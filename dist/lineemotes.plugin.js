@@ -1,23 +1,77 @@
 //META{"name":"lineemotes"}*//
 
-var lineemotes = function () {};
+var lineemotes = function () {
+};
 
 lineemotes.prototype.load = function () {
-    lineemotes.log('Loading');
+    //デバッグログ | DEBUG LOG
+    //console.info(`%c[${lineemotes.prototype.getName()}/load] プラグインを読み込みました`, 'color: greenyellow;');
 };
 
 lineemotes.prototype.start = function () {
-    lineemotes.log('Initializing');
-    BdApi.clearCSS('lineemotes');
-    BdApi.injectCSS('lineemotes', lineemotes.getStylesheet())
-    lineemotes.menu.init();
+    //デバッグログ | DEBUG LOG
+    //console.info(`%c[${lineemotes.prototype.getName()}/start] 読み込み中`, 'color: greenyellow;');
+    var libraryScript = null;
+    if (typeof BDFDB !== "object" || typeof BDFDB.isLibraryOutdated !== "function" || BDFDB.isLibraryOutdated()) {
+        libraryScript = document.querySelector('head script[src="https://mwittrien.github.io/BetterDiscordAddons/Plugins/BDFDB.js"]');
+        if (libraryScript) libraryScript.remove();
+        libraryScript = document.createElement("script");
+        libraryScript.setAttribute("type", "text/javascript");
+        libraryScript.setAttribute("src", "https://mwittrien.github.io/BetterDiscordAddons/Plugins/BDFDB.js")
+        document.head.appendChild(libraryScript);
+        //デバッグログ | DEBUG LOG
+        //console.info(`%c[${lineemotes.prototype.getName()}/start] BDFunctionDevilBro ライブラリを読み込みました`, 'color: greenyellow;');
+    }
+    //デバッグログ | DEBUG LOG
+    //console.info(`%c[${lineemotes.prototype.getName()}/start] %cinitializePL を呼び出しています`, 'color: greenyellow;', 'color: gray;');
+	if (typeof BDFDB === "object" && typeof BDFDB.isLibraryOutdated === "function") initializePL();
+	else libraryScript.addEventListener("load", () => { initializePL(); });
 };
 
 
+initializePL = function() {
+    //デバッグログ | DEBUG LOG
+    //console.info(`%c[${lineemotes.prototype.getName()}/initializePL] %cinitializePL が呼び出されました`, 'color: greenyellow;', 'color: gray;');
+
+    //PluginLibrary ライブラリを読み込む
+	var libraryScript = document.getElementById('zeresLibraryScript');
+	if (!libraryScript) {
+		libraryScript = document.createElement("script");
+		libraryScript.setAttribute("type", "text/javascript");
+		libraryScript.setAttribute("src", "https://rauenzi.github.io/BetterDiscordAddons/Plugins/PluginLibrary.js");
+		libraryScript.setAttribute("id", "zeresLibraryScript");
+        document.head.appendChild(libraryScript);
+        //デバッグログ | DEBUG LOG
+        //console.info(`%c[${lineemotes.prototype.getName()}/initializePL] zeresLibraryScript ライブラリを読み込みました`, 'color: greenyellow;');
+    }
+    //デバッグログ | DEBUG LOG
+    //console.info(`%c[${lineemotes.prototype.getName()}/initializePL] %cinitialize を呼び出しています`, 'color: greenyellow;', 'color: gray;');
+	if (typeof window.ZeresLibrary !== "undefined") initialize();
+	else libraryScript.addEventListener("load", () => { initialize(); });
+};
+
+//ライブラリ読み込み ここまで
+
+
+initialize = function() {
+    //デバッグログ | DEBUG LOG
+    //console.info(`%c[${lineemotes.prototype.getName()}/initialize] %cinitialize が呼び出されました`, 'color: greenyellow;', 'color: gray;');
+    //console.info(`%c[${lineemotes.prototype.getName()}/initialize] プラグインを初期化しています...`, 'color: greenyellow;');
+    BdApi.clearCSS('lineemotes');
+    BdApi.injectCSS('lineemotes', lineemotes.getStylesheet())
+    lineemotes.menu.init();
+    BDFDB.showToast(lineemotes.prototype.getName()+` v`+lineemotes.prototype.getVersion()+` が起動しました`, {timeout:10000, type:"success"});
+};
+
+//起動処理 ここまで
+
+//停止処理
 lineemotes.prototype.stop = function () {
-    lineemotes.log('Stopping, reverting emote menu to default');
+    //デバッグログ | DEBUG LOG
+    //console.info(`%c[${lineemotes.prototype.getName()}/stop] %cプラグインを停止しています... %c| %c絵文字メニューをデフォルトに戻しています...`, 'color: greenyellow;', 'color: red', 'color: white;', 'color: lawngreen');
     lineemotes.menu.unload();
     BdApi.clearCSS('lineemotes');
+    BDFDB.showToast(lineemotes.prototype.getName()+` v`+lineemotes.prototype.getVersion()+` が停止しました`, {timeout:10000, type:"error"});
 };
 
 lineemotes.prototype.unload = function () {
@@ -25,11 +79,11 @@ lineemotes.prototype.unload = function () {
 };
 
 lineemotes.prototype.onMessage = function () {
-    //called when a message is received
+    //メッセージを受け取った時に呼び出される
 };
 
 lineemotes.prototype.onSwitch = function () {
-    //called when a server or channel is switched
+    //サーバーまたはチャンネルを切り替えた時(切り替える時)に呼び出される
 };
 
 lineemotes.prototype.settings = function () {};
@@ -68,7 +122,7 @@ lineemotes.prototype.getSettingsPanel = function () {
     toggle.appendChild(input);
     toggle.appendChild(div);
 
-    return "<div style='display:flex;'><h3 style='color:#b0b6b9;'>Hide sticker URL on client side (others will still see it, switch text channel or server for the change to apply)</h3>" + toggle.outerHTML + "</div>";
+    return "<div style='display:flex;'><h3 style='color:#b0b6b9;'>スタンプURLをクライアントサイドで非表示にする(本家Line Sticker の利用者用、プラグイン側で非表示にしているだけです。)</h3>" + toggle.outerHTML + "</div>";
 };
 
 lineemotes.prototype.getLocalizationStrings = function () {
@@ -101,7 +155,7 @@ lineemotes.prototype.getLocalizationStrings = function () {
 }
 
 //logger function, outputs console message in '[Line Stickers] <message>' format
-lineemotes.log = (message) => console.log(`[${lineemotes.prototype.getName()}] ${message}`);
+lineemotes.log = (message) => console.info(`%c[${lineemotes.prototype.getName()}] ${message}`, 'color: greenyellow;');
 lineemotes.getBDRepo = () => {
     var script_url = $("script[src*='BetterDiscordApp']").attr('src').split('/')
     if (script_url[4] !== 'BetterDiscordApp')
@@ -111,8 +165,8 @@ lineemotes.getBDRepo = () => {
 
 lineemotes.prototype.getName = () => "Line Stickers";
 lineemotes.prototype.getDescription = () => "Extends emote menu to add Line stickers.";
-// lineemotes.prototype.getVersion = () => "0.6.3";
-lineemotes.prototype.getAuthor = () => "Awakening";
+//lineemotes.prototype.getVersion = () => "0.6.9c";
+lineemotes.prototype.getAuthor = () => "Awakening | Edit by ryuuta0217";
 
 
 lineemotes.categories = function() {}
@@ -349,6 +403,8 @@ lineemotes.menu.init = function () {
             }
             this.lastTab = id;
 
+
+            //クリックした時の処理
             var emoteIcon = $(".emote-icon");
             emoteIcon.off();
             emoteIcon.on("click", function() {
@@ -360,12 +416,66 @@ lineemotes.menu.init = function () {
                     // otherwise grab title attribute
                     var emote = $(this).attr("title");
                 }
+                /* Text(URL) ver.
                 // var ta = utils.getTextArea();
                 var ta = $('.channelTextArea-1LDbYG textarea');
                 utils.insertText(ta[0], ta.val().slice(-1) == " " ? ta.val() + emote : ta.val() + " " + emote)
                 // force the textarea to resize if needed
-                ta[0].dispatchEvent(new Event('input', { bubbles: true }));
+                ta[0].dispatchEvent(new Event('input', { bubbles: true })); */
                 
+            //埋込みリンク版 | Embed ver.
+            var image = {url : emote};
+            var channelID = window.location.pathname.split('/').pop();
+            var embed = 	{	type : "rich" };
+            if (image) { embed.image = image; }
+            var data = JSON.stringify({embed : embed});
+            //デバッグログ || DEBUG LOG
+            //console.info(`%c[${lineemotes.prototype.getName()}/embed] %cデータ(JSON): `+data, 'color: greenyellow;', 'color: gold');
+
+            //Get Token || Token取得
+            var DiscordLocalStorageProxy = document.createElement('iframe');
+            DiscordLocalStorageProxy.style.display = 'none';
+            DiscordLocalStorageProxy.id = 'DiscordLocalStorageProxy';
+            document.body.appendChild(DiscordLocalStorageProxy);
+            var token = DiscordLocalStorageProxy.contentWindow.localStorage.token.replace(/"/g, "");
+
+            //デバッグログ | DEBUG LOG
+            //console.info(`%c[${lineemotes.prototype.getName()}/getToken] %c一時的にTokenを取得しました: `+token, 'color: greenyellow;', 'color: crimson');
+            //BDFDB.showToast(`一時的にTokenを取得しました: `+token, {timeout:1500, type:"default"});
+
+            //送信 | Send
+            $.ajax({
+                type : "POST",
+                url : "https://discordapp.com/api/channels/" + channelID + "/messages",
+                headers : {
+                    "authorization": token
+                },
+                dataType : "json",
+                contentType : "application/json",
+                data: data,
+                error: (req, error, exception) => {
+                    console.log(req.responseText);
+                }
+            });
+
+            //デバッグログ | DEBUG LOG
+            //console.info(`%c[${lineemotes.prototype.getName()}/embed] %cスタンプ(Embed)を送信しました`, 'color: greenyellow;', 'color: lime'); //check
+            //BDFDB.showToast(`スタンプを送信しました`, {timeout:2000, type:"success"});
+
+            //一時的に取得したTokenを削除 | Remove Token
+            delete DiscordLocalStorageProxy;
+            var token = "0";
+
+            //デバッグログ | DEBUG LOG
+            //console.info(`%c[${lineemotes.prototype.getName()}/post-process] %cToken Check: `+token, 'color: greenyellow;', 'color: white'); //check
+            if(token == "0") {
+                //console.info(`%c[${lineemotes.prototype.getName()}/post-process] %cTokenを削除しました`, 'color: greenyellow;', 'color: lawngreen');
+                //BDFDB.showToast(`保存していたTokenを削除しました`, {timeout:2500, type:"success"});
+            } else {
+                //console.info(`%c[${lineemotes.prototype.getName()}/post-process] %cTokenを削除できませんでした`, 'color: greenyellow;', 'color: crimson');
+                BDFDB.showToast(`保存していたTokenを削除できませんでした`, {timeout:2500, type:"danger"});
+            }
+
             });
             lineemotes.preview.init();
             lineemotes.categories.init();
@@ -1280,4 +1390,4 @@ var stylesheet = `#bda-qem-line-container .icon-edit {
 ` 
 return "<style>" + stylesheet + "</style>"; 
 };
-lineemotes.prototype.getVersion = () => "0.6.9с";
+lineemotes.prototype.getVersion = () => "0.6.9d";

@@ -1,113 +1,95 @@
-_Feel free to [join the Discord server](https://discordapp.com/invite/wCX6K8q) and ping me if you have any questions or [open an Issue on GitHub](https://github.com/awaken1ng/bd-linestickers/issues)_
+# BetterDiscord Line Stickers Plugin
 
-[日本語の解説](README_ja.md)
+BetterDiscordの絵文字欄にLINEスタンプを追加するプラグインの埋込みリンク版です。
+(埋込みリンクとしてスタンプを送信します)
+####ただし、このプラグインの使用はあなたのDiscordアカウントのBANにつながる可能性があります。
+理由は、引用プラグイン 「Citador」やこのプラグインのように、埋込みリンクは通常の手段では送信できません。
+それを送信可能にしていることが原因です。ですから、利用は自己責任でお願いします。
+[![](https://camo.githubusercontent.com/25c21ec8386003654c51774f3232f3fa2a6a6203/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3332333631323731313731383232333837332f756e6b6e6f776e2e706e67)](https://github.com/awaken1ng/bd-linestickers/blob/master/README_ja.md#%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB)
+[![](https://camo.githubusercontent.com/9a3e2978fd180a46bc13c806ae260526e50874ff/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3332333631343334363439383430383434392f756e6b6e6f776e2e706e67)](https://github.com/awaken1ng/bd-linestickers/blob/master/README_ja.md#%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB)
 
-# BetterDiscord LINE Stickers Plugin
 
-Extends BetterDiscord emote menu to add a tab with LINE stickers to it
-[![](https://camo.githubusercontent.com/6b145ba99071dd660d1ac866cc507e74de704874/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3332333539363635363935343137393538352f756e6b6e6f776e2e706e67)](https://github.com/awaken1ng/bd-linestickers#installation)
-[![](https://camo.githubusercontent.com/84a146ee8b202df573c4c4303759ea19a8b150ee/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3332333539363637393032303431323932382f756e6b6e6f776e2e706e67)](https://github.com/awaken1ng/bd-linestickers#installation)
+## インストール
 
-*※ to enable Dark theme, enable Dark mode in BetterDiscord settings*
+* [BetterDiscord](https://github.com/rauenzi/BetterDiscordApp)をインストールする。
+* プラグインをインストール
+	* BetterDiscordのプラグインフォルダ(`%appdata%\BetterDiscord\plugins`)をエクスプローラーで開く
+  * [`lineemotes.plugin.js`](https://raw.githubusercontent.com/ryuuta0217/bd-linestickers/master/dist/lineemotes.plugin.js)を保存してプラグインフォルダに入れる
+*  Discordを再起動 (Ctrl + R で再起動します)
+* プラグインを有効化する
+  * `ユーザー設定` - `BetterDiscord` - `Plugins`を開き、プラグインリストから __Line Stickers__ を有効化します。
+* 絵文字メニューを開けば __LINE__ タブが追加されているはずです。
 
-## Installation
 
-* Install [BetterDiscord](https://github.com/rauenzi/BetterDiscordApp)
-* Install the plugin
-	* Open the folder at `C:\Users\<user>\AppData\Roaming\BetterDiscord\plugins` by navigating there via File Explorer of your choice
-  * Drop the plugin [`lineemotes.plugin.js`](https://raw.githubusercontent.com/awaken1ng/bd-linestickers/master/dist/lineemotes.plugin.js) off there
-*  Restart Discord (*Ctrl + R or a method of your choice*)
-* Make sure the plugin is enabled
-  * Open `User Settings` - `BetterDiscord` - `Plugins`, you should see plugin in the list, enable it by checking the box
-* Open the Emote menu, you should see a **LINE** tab in there
+## パックを追加する
 
-## Removing or renaming stickers
+### パックを手に入れる
 
-Move your cursor into the right part of the title, you'll see two icons there
+パックは[LINE Store](https://store.line.me/home/ja)で手に入れることができます。
 
-![](https://camo.githubusercontent.com/1cf0df3ea7383c2ab2798705d5f29b18eb841ab5/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3330363032303830333534363434373837322f3334353934333731343336353137373835362f756e6b6e6f776e2e706e67)
+このプラグインで使用するために購入する必要はありません。
 
-### Deleting
+パックを追加するのに必要なもの:
+* パックのタイトル
+* パックの最初のスタンプのID
+* パックに含まれているスタンプ数
 
-Click on the cross icon and confirm deletion
+パックを追加するには2つの方法があります:
+* 絵文字メニューから
+* Discordのconsoleから
 
-![](https://camo.githubusercontent.com/badffdb26d735d0d0807333d5dd3c8e4d60ffebd/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3330363032303830333534363434373837322f3334353934343033343730393334303138312f756e6b6e6f776e2e706e67)
+### 絵文字メニューから
 
-### Renaming 
-
-Click on the pen icon, edit the name, then either press `Enter` or click away
-
-*※ In case of an emergency, you can edit the config at `%appdata%\BetterDiscord\plugins\lineemotes.config.json` manually, after making changes, please fully restart Discord by closing it and opening it again*
-
-## Adding stickers
-
-### Getting stickers
-
-You can find them on [LINE Store](https://store.line.me/home/en)
-
-*※ No, you don't need to buy them*
-
-To add a sticker pack you'll need:
-* it's title
-* the ID of a first sticker
-* total count of stickers in a pack
-
-There are two ways of adding stickers:
-* via tab in emote menu
-* via Discord console
-
-### Via tab in the menu
-
-* Open the tab by pressing the plus sign at the bottom
+* タブの左下にある __+__ を開くと
 
   ![](https://camo.githubusercontent.com/c1f110a58855ef1f197fae9f3fc5f17feee2ba79/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3332333630313937353139373330323738352f756e6b6e6f776e2e706e67)
 
-* The following form should show up:
+* 入力フォームが出てきます:
 
-  ![](https://camo.githubusercontent.com/b679d291fabdb1fc8a6ce36917d68275f31a963c/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3332333630323130313939313234333737382f756e6b6e6f776e2e706e67)
+  ![](https://camo.githubusercontent.com/72c58b5c2260adfc72f4ad3a0947ef788b03c621/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3332333931333732303838393630363136342f756e6b6e6f776e2e706e67)
 
-* Enter the title, amount of stickers in a pack and the ID of the first sticker and press `Add` button
+* タイトルとID、スタンプの数を入力して`追加`を押せば完了です。
 
-  ![](https://camo.githubusercontent.com/756765fef0bc6a58ea242015d0bab7481c210e5a/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3332333630323332323536313137313435382f756e6b6e6f776e2e706e67)
+  ![](https://camo.githubusercontent.com/40080f8fd328c2713f03c745688447ece27fb19f/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3332333931333732393830363935383539322f756e6b6e6f776e2e706e67)
 
-### Via Discord console
+### Discordのconsoleから
 
-* Open the developer tools by pressing `Ctrl + Shift + I`
+* `Ctrl + Shift + I`を押してDeveloper toolsを開きます。
 
-* In a console, execute the following command: ``lineemotes.appendPack(`title`, first_sticker_id, sticker count)``
-<br> *※ for example ``lineemotes.appendPack(`Miko sister of fox`, 1133826, 40)``*
+* consoleで以下のコマンドを実行します: ``lineemotes.appendPack(`タイトル`, 最初のスタンプのID, スタンプの数)``
+<br> 例: *``lineemotes.appendPack(`きつねみみこ`, 1133826, 40)``*
 
+### スタンプのID、スタンプの数を取得する
 
-### Getting sticker's title, ID and sticker count
+#### Grease/Tampermonkeyのユーザースクリプトを使って取得する
+[![](https://camo.githubusercontent.com/ea08b41f22f96abe3addd30f38799337e7873510/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3332333831383538333833323339353737362f756e6b6e6f776e2e706e67)](https://greasyfork.org/en/scripts/23630)
 
-#### Grease/Tampermonkey user script
-[![](https://camo.githubusercontent.com/90e0741670663dbc6e414478d793b5a50ffbb2cb/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3331303138363631353934313336353736302f756e6b6e6f776e2e706e67)](https://greasyfork.org/en/scripts/23630)
+もしあなたが[Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)か[Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)を使っているならば、[このスクリプト](https://greasyfork.org/en/scripts/23630)を使用するとストアのページにIDなど必要な情報を自動で表示することができます。
 
-If you're using [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) or [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) you can [download a user script](https://greasyfork.org/en/scripts/23630) that will show you the title, first sticker ID, amount of stickers and append string on the page
+#### consoleでJavascriptを使って取得する
+下記のぐちゃぐちゃしたJavaScriptをブラウザのconsoleに入力することで先述したユーザースクリプトと同じ効果を得ることができます。
 
-#### Javascript in the console
-Similar to user script above, you can run the following scary looking line of JavaScript in your browser's console. It will output the same thing script above would.
-
-*※ You can access the console by opening Developer Tools from context menu by right clicking somewhere on the page or using the same Ctrl + Shift + I hotkey to open Developer Tools*
+consoleには開発者ツールからアクセスできます。  
+開発者ツールはページを右クリックして __要素を検証__ か`Ctrl + Shift + I`で出すことができます。
 
 ```
-console.log('Title: ' + $('.mdCMN08Ttl').text() + '\nFirst sticker ID: ' + $('.mdCMN09Image').first().css('background-image').match(/sticker\/(\d+)/)[1] + '\nLength: ' + $('.mdCMN09Li').length.toString() + '\nAppend string:\n' + 'lineemotes.appendPack(`' + $('.mdCMN08Ttl').text() + '`, ' + $('.mdCMN09Image').first().css('background-image').match(/sticker\/(\d+)/)[1] + ', ' + $('.mdCMN09Li').length.toString() + ')')
+console.log('タイトル: ' + $('.mdCMN08Ttl').text() + '\n最初のスタンプID: ' + $('.mdCMN09Image').first().css('background-image').match(/sticker\/(\d+)/)[1] + '\nスタンプの数: ' + $('.mdCMN09Li').length.toString() + '\n追加コマンド:\n' + 'lineemotes.appendPack(`' + $('.mdCMN08Ttl').text() + '`, ' + $('.mdCMN09Image').first().css('background-image').match(/sticker\/(\d+)/)[1] + ', ' + $('.mdCMN09Li').length.toString() + ')')
 ```
 
-#### Manual way
-##### Finding first sticker ID
-Sticker ID can be found in a sticker URL, the said URL can be extracted from a page by right clicking on a sticker and inspecting the element
+#### 手動で探す
+##### 最初のスタンプのID
+パックのURLからIDを見つけることができます。ページの最初のスタンプ画像を右クリックして __要素を検証__ しURLからIDを見つけます。
 
 ![](https://camo.githubusercontent.com/78635b5611f1cb82378737c741dd3a3c255569e7/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3331303139333031353831353739383738362f756e6b6e6f776e2e706e67)
 
-##### Finding sticker count
-Just count them =P
+##### 画像の数
+数えて下さい =P
 
-Default sticker count is 40, which is the standard for most sticker packs, however, some packs, usually animated, can be an exception to this
+基本的には40です。しかしアニメーションスタンプなどは数が違うことがあります。
 
-## Resizing the window
+## ウィンドウサイズを変える
 
-You can resize the LINE tab using the following commands in console:
+consoleに以下のコマンドを打つことで、Lineタブの大きさを変えることができます。
 
 `lineemotes.menu.setWidth(width)`
 
@@ -115,29 +97,25 @@ You can resize the LINE tab using the following commands in console:
 
 `lineemotes.menu.setSize(width, height)`
 
-*※ for example `lineemotes.menu.setSize(494, 326)`*
+例: *`lineemotes.menu.setSize(494, 326)`*
 
-## Adding unavailable stickers
-[![](https://camo.githubusercontent.com/6a6c9d4febc36ae58e9e0f7577aab1756a020f70/68747470733a2f2f696d616765732d312e646973636f72646170702e6e65742f2e654a774e7955734f7779414d414e47376341444d78355130743045456b61674a52746852466c5876586d6235357176756361705637534b64563444743445786a30797730556932364574577a704836777a6e5242456b6c3576306f54427563746f6e50653277556a786f426d556c6a4d793367625a2d453948397a74302d687075726571666e384642434c532e72394b32513273713566664d526b786a6f466175426d7a30663755)](https://store.line.me/stickershop/product/2999/ja)
+## 利用不能なスタンプを追加する
 
-Some sticker packs might greet you with the message above
+[![](https://camo.githubusercontent.com/974ce855a347d25d2e5acb75719e8b1602086721/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3332333631353331383030333934313337362f756e6b6e6f776e2e706e67)](https://store.line.me/stickershop/product/2999/ja)
 
-One way to get sticker IDs is to download the pack using the API endpoint that LINE app is using, use the following template
+いくつかのスタンプは利用できないことがあります。
 
-`https://dl.stickershop.line.naver.jp/products/0/0/1/<packid>/android/stickers.zip`
+スタンプのIDを取得する1つの方法は、LINEアプリが使用しているAPIエンドポイントを使用してパックをダウンロードすることです。次のテンプレートを使用します:
 
-For example `https://dl.stickershop.line.naver.jp/products/0/0/1/2999/android/stickers.zip` for the pack above
+`https://dl.stickershop.line.naver.jp/products/0/0/1/パックID/android/stickers.zip`
 
-*Note: you can find the pack ID in the page's URL*
-![](https://camo.githubusercontent.com/fe841f6288a0dd1c28c161494ed36d4a97f6acca/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3331303139343039333631333531343737342f756e6b6e6f776e2e706e67)
+例: `https://dl.stickershop.line.naver.jp/products/0/0/1/2999/android/stickers.zip`
 
-Using a file archiver of your choice, open the zip file, find the sticker with the lowest ID, that will be the first sticker ID
+パックIDはページのURLから見つけることができます。
+![](http://i.imgur.com/96dJgJr.png)
 
-*※ assuming sticker count is 40, if the zip file doesn't contain 83 files (40 stickers, 40 thumbnails, 2 category icons, 1 metadata file), set the sticker count accordingly*
+適当なアーカイバでダウンロードしたzipを開き、画像の最初のIDを確認します。
 
-## CSS patches for theme compatibility
+例えばスタンプの数が40だった場合83のファイルが含まれています。(40のスタンプ画像, 40のサムネイル, 2つのアイコン, 1つのメタデータファイル)
 
-Copy and paste the CSS patch into Custom CSS
-
-- Beard's Material Design ([theme](https://github.com/BeardDesign1/Material-design-theme), [patch](https://gist.github.com/awaken1ng/417d8faf8dc69f5df9c43ede3c841856))
-- Full Dark ([theme](https://github.com/fluffingtons/fulldark), [patch](https://gist.github.com/awaken1ng/3ff89021b3f913254e515ae0393790af))
+あとはスタンプの数を確認して登録ができます。
