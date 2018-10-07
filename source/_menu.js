@@ -102,12 +102,13 @@ lineemotes.menu.init = function () {
             }
             this.lastTab = id;
 
+
             //クリックした時の処理
             var emoteIcon = $(".emote-icon");
             emoteIcon.off();
             emoteIcon.on("click", function() {
                 // find out what tab we're dealing with
-                if ($(this).parent().parent().attr("class") === 'line-pack-stickers') {
+                if ($(this).parent().parent().hasClass("line-pack-stickers")) {
                     // if dealing with line stickers tab, grab src
                     var emote = $(this).attr("src") // + '\n';
                 } else {
@@ -128,18 +129,30 @@ lineemotes.menu.init = function () {
             if (image) { embed.image = image; }
             var data = JSON.stringify({embed : embed});
             //デバッグログ || DEBUG LOG
-            console.info(`%c[${lineemotes.prototype.getName()}/embed] %cデータ(JSON): `+data, 'color: greenyellow;', 'color: gold');
+            //console.info(`%c[${lineemotes.prototype.getName()}/embed] %cデータ(JSON): `+data, 'color: greenyellow;', 'color: gold');
 
             //Get Token || Token取得
-            var DiscordLocalStorageProxy = document.createElement('iframe');
-            DiscordLocalStorageProxy.style.display = 'none';
-            DiscordLocalStorageProxy.id = 'DiscordLocalStorageProxy';
-            document.body.appendChild(DiscordLocalStorageProxy);
-            var token = DiscordLocalStorageProxy.contentWindow.localStorage.token.replace(/"/g, "");
-
-            //デバッグログ | DEBUG LOG
-            console.info(`%c[${lineemotes.prototype.getName()}/getToken] %c一時的にTokenを取得しました: `+token, 'color: greenyellow;', 'color: crimson');
-            BDFDB.showToast(`一時的にTokenを取得しました: `+token, {timeout:1500, type:"default"});
+            var isError = false;
+            if(token == null || typeof token === "undefined") {
+                try {
+                    var DiscordLocalStorageProxy = document.createElement('iframe');
+                    DiscordLocalStorageProxy.style.display = 'none';
+                    DiscordLocalStorageProxy.id = 'DiscordLocalStorageProxy';
+                    document.body.appendChild(DiscordLocalStorageProxy);
+                    //デバッグログ | DEBUG LOG
+                    //console.info(`%c[${lineemotes.prototype.getName()}/line-440] %cTOKEN(NOT REPLACED): `+DiscordLocalStorageProxy.contentWindow.localStorage.token, 'color: greenyellow;', 'color: gold');
+                    token = DiscordLocalStorageProxy.contentWindow.localStorage.token.replace(/"/g, "");
+                
+                    //デバッグログ | DEBUG LOG
+                    //console.info(`%c[${lineemotes.prototype.getName()}/getToken] %cTokenを取得しました: `+token, 'color: greenyellow;', 'color: crimson');
+                    BDFDB.showToast(`Tokenを取得しました: `+token, {timeout:4000, type:"default"});
+                    BDFDB.showToast(`このTokenはDiscordが再読み込みされるまで保持されます`, {timeout:4000, type:"warn"});
+                } catch(e) {
+                    isError = true;
+                    BDFDB.showToast(`Tokenの取得に失敗しました。`, {timeout:4000, type:"error"});
+                    BDFDB.showToast(`Ctrl+Rで再読み込みすると治る可能性があります。`, {timeout:4000, type:"error"});
+                }
+            }
 
             //送信 | Send
             $.ajax({
@@ -152,14 +165,24 @@ lineemotes.menu.init = function () {
                 contentType : "application/json",
                 data: data,
                 error: (req, error, exception) => {
-                    console.log(req.responseText);
+                    isError = true;
+                    BDFDB.showToast(`エラーが発生しました: ${req.responseText.replace('{"code": 0, "message": "401: Unauthorized"}', "HTTP 401: 認証されていません")}`, {timeout:4000, type:"error"});
+                    //デバッグログ | DEBUG LOG
+                    //console.error(`An Internal Error occured: ${req.responseText.replace('{"code": 0, "message": "401: Unauthorized"}', "HTTP 401: 認証されていません")}`);
                 }
             });
 
-            //デバッグログ | DEBUG LOG
-            console.info(`%c[${lineemotes.prototype.getName()}/embed] %cスタンプ(Embed)を送信しました`, 'color: greenyellow;', 'color: lime'); //check
-            BDFDB.showToast(`スタンプを送信しました`, {timeout:2000, type:"success"});
+            if(!isError) {
+                //デバッグログ | DEBUG LOG
+                //console.info(`%c[${lineemotes.prototype.getName()}/embed] %cスタンプ(Embed)を送信しました`, 'color: greenyellow;', 'color: lime'); //check
+                BDFDB.showToast(`スタンプを送信しました`, {timeout:2000, type:"success"});
+            } else {
+                //デバッグログ | DEBUG LOG
+                //console.error(`%c[${lineemotes.prototype.getName()}/embed] %cスタンプ(Embed)の送信に失敗しました`, 'color: greenyellow;', 'color: lime'); //check
+                BDFDB.showToast(`スタンプの送信に失敗しました`, {timeout:4000, type:"error"});
+            }
 
+            /*
             //一時的に取得したTokenを削除 | Remove Token
             delete DiscordLocalStorageProxy;
             var token = "0";
@@ -167,12 +190,12 @@ lineemotes.menu.init = function () {
             //デバッグログ | DEBUG LOG
             console.info(`%c[${lineemotes.prototype.getName()}/post-process] %cToken Check: `+token, 'color: greenyellow;', 'color: white'); //check
             if(token == "0") {
-                console.info(`%c[${lineemotes.prototype.getName()}/post-process] %cTokenを削除しました`, 'color: greenyellow;', 'color: lawngreen');
-                BDFDB.showToast(`保存していたTokenを削除しました`, {timeout:2500, type:"success"});
+                //console.info(`%c[${lineemotes.prototype.getName()}/post-process] %cTokenを削除しました`, 'color: greenyellow;', 'color: lawngreen');
+                //BDFDB.showToast(`保存していたTokenを削除しました`, {timeout:2500, type:"success"});
             } else {
-                console.info(`%c[${lineemotes.prototype.getName()}/post-process] %cTokenを削除できませんでした`, 'color: greenyellow;', 'color: crimson');
+                //console.info(`%c[${lineemotes.prototype.getName()}/post-process] %cTokenを削除できませんでした`, 'color: greenyellow;', 'color: crimson');
                 BDFDB.showToast(`保存していたTokenを削除できませんでした`, {timeout:2500, type:"danger"});
-            }
+            }*/
 
             });
             lineemotes.preview.init();
@@ -355,17 +378,17 @@ lineemotes.menu.appendPack = function(id) {
         .mouseleave(function(e) { lineemotes.preview.hide(); })
         .on("click", function() {
             // find out what tab we're dealing with
-            if ($(this).parent().parent().attr("class") === 'line-pack-stickers') {
+            if ($(this).parent().parent().hasClass("line-pack-stickers")) {
                 // if dealing with line stickers tab, grab src
-                var emote = $(this).attr("src");
+                var emote = $(this).attr("src") // + '\n';
             } else {
                 // otherwise grab title attribute
                 var emote = $(this).attr("title");
             }
-            var ta = $(".chat form textarea");
-            var text = ta.val().slice(-1) == " " ? emote : " " + emote
-            ta.focus();
-            document.execCommand("insertText", false, text);
+            var ta = utils.getTextArea();
+            utils.insertText(ta[0], ta.val().slice(-1) == " " ? ta.val() + emote : ta.val() + " " + emote)
+            // force the textarea to resize if needed
+            ta[0].dispatchEvent(new Event('input', { bubbles: true }));
         });
 
     // enable deletion

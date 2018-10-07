@@ -1,13 +1,18 @@
 //META{"name":"lineemotes"}*//
 
-var lineemotes = function () {};
+var lineemotes = function () {
+};
+
+var token;
 
 lineemotes.prototype.load = function () {
-    console.info(`%c[${lineemotes.prototype.getName()}/load] プラグインを読み込みました`, 'color: greenyellow;');
+    //デバッグログ | DEBUG LOG
+    //console.info(`%c[${lineemotes.prototype.getName()}/load] プラグインを読み込みました`, 'color: greenyellow;');
 };
 
 lineemotes.prototype.start = function () {
-    console.info(`%c[${lineemotes.prototype.getName()}/start] 読み込み中`, 'color: greenyellow;');
+    //デバッグログ | DEBUG LOG
+    //console.info(`%c[${lineemotes.prototype.getName()}/start] 読み込み中`, 'color: greenyellow;');
     var libraryScript = null;
     if (typeof BDFDB !== "object" || typeof BDFDB.isLibraryOutdated !== "function" || BDFDB.isLibraryOutdated()) {
         libraryScript = document.querySelector('head script[src="https://mwittrien.github.io/BetterDiscordAddons/Plugins/BDFDB.js"]');
@@ -16,16 +21,20 @@ lineemotes.prototype.start = function () {
         libraryScript.setAttribute("type", "text/javascript");
         libraryScript.setAttribute("src", "https://mwittrien.github.io/BetterDiscordAddons/Plugins/BDFDB.js")
         document.head.appendChild(libraryScript);
-        console.info(`%c[${lineemotes.prototype.getName()}/start] BDFunctionDevilBro ライブラリを読み込みました`, 'color: greenyellow;');
+        //デバッグログ | DEBUG LOG
+        //console.info(`%c[${lineemotes.prototype.getName()}/start] BDFunctionDevilBro ライブラリを読み込みました`, 'color: greenyellow;');
     }
-    console.info(`%c[${lineemotes.prototype.getName()}/start] %cinitializePL を呼び出しています`, 'color: greenyellow;', 'color: gray;');
+    //デバッグログ | DEBUG LOG
+    //console.info(`%c[${lineemotes.prototype.getName()}/start] %cinitializePL を呼び出しています`, 'color: greenyellow;', 'color: gray;');
 	if (typeof BDFDB === "object" && typeof BDFDB.isLibraryOutdated === "function") initializePL();
 	else libraryScript.addEventListener("load", () => { initializePL(); });
 };
 
 
 initializePL = function() {
-    console.info(`%c[${lineemotes.prototype.getName()}/initializePL] %cinitializePL が呼び出されました`, 'color: greenyellow;', 'color: gray;');
+    //デバッグログ | DEBUG LOG
+    //console.info(`%c[${lineemotes.prototype.getName()}/initializePL] %cinitializePL が呼び出されました`, 'color: greenyellow;', 'color: gray;');
+
     //PluginLibrary ライブラリを読み込む
 	var libraryScript = document.getElementById('zeresLibraryScript');
 	if (!libraryScript) {
@@ -34,9 +43,11 @@ initializePL = function() {
 		libraryScript.setAttribute("src", "https://rauenzi.github.io/BetterDiscordAddons/Plugins/PluginLibrary.js");
 		libraryScript.setAttribute("id", "zeresLibraryScript");
         document.head.appendChild(libraryScript);
-        console.info(`%c[${lineemotes.prototype.getName()}/initializePL] zeresLibraryScript ライブラリを読み込みました`, 'color: greenyellow;');
+        //デバッグログ | DEBUG LOG
+        //console.info(`%c[${lineemotes.prototype.getName()}/initializePL] zeresLibraryScript ライブラリを読み込みました`, 'color: greenyellow;');
     }
-    console.info(`%c[${lineemotes.prototype.getName()}/initializePL] %cinitialize を呼び出しています`, 'color: greenyellow;', 'color: gray;');
+    //デバッグログ | DEBUG LOG
+    //console.info(`%c[${lineemotes.prototype.getName()}/initializePL] %cinitialize を呼び出しています`, 'color: greenyellow;', 'color: gray;');
 	if (typeof window.ZeresLibrary !== "undefined") initialize();
 	else libraryScript.addEventListener("load", () => { initialize(); });
 };
@@ -45,8 +56,9 @@ initializePL = function() {
 
 
 initialize = function() {
-    console.info(`%c[${lineemotes.prototype.getName()}/initialize] %cinitialize が呼び出されました`, 'color: greenyellow;', 'color: gray;');
-    console.info(`%c[${lineemotes.prototype.getName()}/initialize] プラグインを初期化しています...`, 'color: greenyellow;');
+    //デバッグログ | DEBUG LOG
+    //console.info(`%c[${lineemotes.prototype.getName()}/initialize] %cinitialize が呼び出されました`, 'color: greenyellow;', 'color: gray;');
+    //console.info(`%c[${lineemotes.prototype.getName()}/initialize] プラグインを初期化しています...`, 'color: greenyellow;');
     BdApi.clearCSS('lineemotes');
     BdApi.injectCSS('lineemotes', lineemotes.getStylesheet())
     lineemotes.menu.init();
@@ -57,7 +69,8 @@ initialize = function() {
 
 //停止処理
 lineemotes.prototype.stop = function () {
-    console.info(`%c[${lineemotes.prototype.getName()}/stop] %cプラグインを停止しています... %c| %c絵文字メニューをデフォルトに戻しています...`, 'color: greenyellow;', 'color: red', 'color: white;', 'color: lawngreen');
+    //デバッグログ | DEBUG LOG
+    //console.info(`%c[${lineemotes.prototype.getName()}/stop] %cプラグインを停止しています... %c| %c絵文字メニューをデフォルトに戻しています...`, 'color: greenyellow;', 'color: red', 'color: white;', 'color: lawngreen');
     lineemotes.menu.unload();
     BdApi.clearCSS('lineemotes');
     BDFDB.showToast(lineemotes.prototype.getName()+` v`+lineemotes.prototype.getVersion()+` が停止しました`, {timeout:10000, type:"error"});
@@ -154,6 +167,6 @@ lineemotes.getBDRepo = () => {
 
 lineemotes.prototype.getName = () => "Line Stickers";
 lineemotes.prototype.getDescription = () => "Extends emote menu to add Line stickers.";
-// lineemotes.prototype.getVersion = () => "0.6.3";
+//lineemotes.prototype.getVersion = () => "0.6.9c";
 lineemotes.prototype.getAuthor = () => "Awakening | Edit by ryuuta0217";
 

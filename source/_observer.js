@@ -1,5 +1,4 @@
 
-
 lineemotes.prototype.observer = function (mutation) {
     var status = bdPluginStorage.get(lineemotes.storage.getName(), 'hideURLs');
     if (status === null) {
