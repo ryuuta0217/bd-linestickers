@@ -3,12 +3,8 @@
 BetterDiscordの絵文字欄にLINEスタンプを追加するプラグインの埋込みリンク版です。<br>
 (埋込みリンクとしてスタンプを送信します)<br>
 
-### スタンプが送信できない問題について
-スタンプが送信できない場合は、一時的な回避策ですが<br>
-**ユーザー設定** > **Zere's Fork** > **Normalize Classes** を無効にしてください。<br>
-(デフォルトでは有効です)
-
 #### ただし、このプラグインの使用はあなたのDiscordアカウントのBANにつながる可能性があります。
+#### Using this plugin could lead to your BAN in your Discord account.
 理由は、引用プラグイン 「Citador」やこのプラグインのように、埋込みリンクは通常の手段では送信できません。<br>
 それを送信可能にしていることが原因です。ですから、利用は自己責任でお願いします。<br>
 [![](https://camo.githubusercontent.com/25c21ec8386003654c51774f3232f3fa2a6a6203/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3233313434323233333138343734373534302f3332333631323731313731383232333837332f756e6b6e6f776e2e706e67)](https://github.com/awaken1ng/bd-linestickers/blob/master/README_ja.md#%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB)
