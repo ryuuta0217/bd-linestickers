@@ -519,9 +519,9 @@ lineemotes.menu.buildContainer = function () {
     // var container = `${lineemotes.getStylesheet()}
     var container = `
 <div id="bda-qem-line-container">
-    <div class="scroller-wrap fade">
+    <div class="scrollerWrap-2lJEkd scrollerFade-1Ijw5y">
         ${lineemotes.confirm.buildContainer()}
-        <div class="scroller">
+        <div class="scroller-2FKFPG">
             <div class="emote-menu-inner">
                 ${stickers}
             </div>
@@ -1414,4 +1414,4 @@ var stylesheet = `#bda-qem-line-container .icon-edit {
 ` 
 return "<style>" + stylesheet + "</style>"; 
 };
-lineemotes.prototype.getVersion = () => "0.7.0";
+lineemotes.prototype.getVersion = () => "0.7.1";
