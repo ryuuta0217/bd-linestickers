@@ -1,1417 +1,911 @@
-//META{"name":"lineemotes"}*//
-
-var lineemotes = function () {
-};
-
+//META{"name":"_lineemotes"}*//
 var token;
+var pl_name;
+var pl_ver;
 
-lineemotes.prototype.load = function () {
-    //デバッグログ | DEBUG LOG
-    //console.info(`%c[${lineemotes.prototype.getName()}/load] プラグインを読み込みました`, 'color: greenyellow;');
-};
-
-lineemotes.prototype.start = function () {
-    //デバッグログ | DEBUG LOG
-    //console.info(`%c[${lineemotes.prototype.getName()}/start] 読み込み中`, 'color: greenyellow;');
+function inject(name, options) {
+  return new Promise(re => {
     var libraryScript = null;
     if (typeof BDFDB !== "object" || typeof BDFDB.isLibraryOutdated !== "function" || BDFDB.isLibraryOutdated()) {
         libraryScript = document.querySelector('head script[src="https://mwittrien.github.io/BetterDiscordAddons/Plugins/BDFDB.js"]');
         if (libraryScript) libraryScript.remove();
         libraryScript = document.createElement("script");
+        libraryScript.setAttribute("id", "BDFDB");
         libraryScript.setAttribute("type", "text/javascript");
         libraryScript.setAttribute("src", "https://mwittrien.github.io/BetterDiscordAddons/Plugins/BDFDB.js")
         document.head.appendChild(libraryScript);
         //デバッグログ | DEBUG LOG
         //console.info(`%c[${lineemotes.prototype.getName()}/start] BDFunctionDevilBro ライブラリを読み込みました`, 'color: greenyellow;');
     }
-    //デバッグログ | DEBUG LOG
-    //console.info(`%c[${lineemotes.prototype.getName()}/start] %cinitializePL を呼び出しています`, 'color: greenyellow;', 'color: gray;');
-	if (typeof BDFDB === "object" && typeof BDFDB.isLibraryOutdated === "function") initializePL();
-	else libraryScript.addEventListener("load", () => { initializePL(); });
-};
+    re(libraryScript);
+    setTimeout(() => {
+      re(null);
+    }, 3000);
+  })
+}
 
+async function initializePL() {
+  await inject('script', {
+    type: 'text/javascript',
+    id: 'BDFDB',
+    src: 'https://mwittrien.github.io/BetterDiscordAddons/Plugins/BDFDB.js'
+  });
+  if (typeof BDFDB !== "object" || typeof BDFDB.isLibraryOutdated !== "function") {
+    console.log("BDFDB is could not be loaded.")
+    return;
+  }
 
-initializePL = function() {
-    //デバッグログ | DEBUG LOG
-    //console.info(`%c[${lineemotes.prototype.getName()}/initializePL] %cinitializePL が呼び出されました`, 'color: greenyellow;', 'color: gray;');
-
-    //PluginLibrary ライブラリを読み込む
-	var libraryScript = document.getElementById('zeresLibraryScript');
-	if (!libraryScript) {
-		libraryScript = document.createElement("script");
-		libraryScript.setAttribute("type", "text/javascript");
-		libraryScript.setAttribute("src", "https://rauenzi.github.io/BetterDiscordAddons/Plugins/PluginLibrary.js");
-		libraryScript.setAttribute("id", "zeresLibraryScript");
-        document.head.appendChild(libraryScript);
+  BDFDB.showToast(pl_name + ` v` + pl_ver + " が起動しました", {timeout:10000, type:"success"});
+  if(token == null || typeof token === "undefined") {
+    try {
+        var DiscordLocalStorageProxy = document.createElement('iframe');
+        DiscordLocalStorageProxy.style.display = 'none';
+        DiscordLocalStorageProxy.id = 'DiscordLocalStorageProxy';
+        document.body.appendChild(DiscordLocalStorageProxy);
         //デバッグログ | DEBUG LOG
-        //console.info(`%c[${lineemotes.prototype.getName()}/initializePL] zeresLibraryScript ライブラリを読み込みました`, 'color: greenyellow;');
+        //console.info(`%c[${pl_name}/line-440] %cTOKEN(NOT REPLACED): `+DiscordLocalStorageProxy.contentWindow.localStorage.token, 'color: greenyellow;', 'color: gold');
+        token = DiscordLocalStorageProxy.contentWindow.localStorage.token.replace(/"/g, "");
+    
+        //デバッグログ | DEBUG LOG
+        //console.info(`%c[${pl_name}/getToken] %cTokenを取得しました: `+token, 'color: greenyellow;', 'color: crimson');
+        BDFDB.showToast(`LINE Stickers@Tokenを取得しました: `+token, {timeout:4000, type:"default"});
+        BDFDB.showToast(`このTokenはDiscordが再読み込みされるまで保持されます`, {timeout:4000, type:"warn"});
+    } catch(e) {
+        BDFDB.showToast(`LINE Stickers@Tokenの取得に失敗しました。`, {timeout:4000, type:"error"});
+        BDFDB.showToast(`Ctrl+Rで再読み込みすると治る可能性があります。`, {timeout:4000, type:"error"});
     }
-    //デバッグログ | DEBUG LOG
-    //console.info(`%c[${lineemotes.prototype.getName()}/initializePL] %cinitialize を呼び出しています`, 'color: greenyellow;', 'color: gray;');
-	if (typeof window.ZeresLibrary !== "undefined") initialize();
-	else libraryScript.addEventListener("load", () => { initialize(); });
-};
-
-//ライブラリ読み込み ここまで
-
-
-initialize = function() {
-    //デバッグログ | DEBUG LOG
-    //console.info(`%c[${lineemotes.prototype.getName()}/initialize] %cinitialize が呼び出されました`, 'color: greenyellow;', 'color: gray;');
-    //console.info(`%c[${lineemotes.prototype.getName()}/initialize] プラグインを初期化しています...`, 'color: greenyellow;');
-    BdApi.clearCSS('lineemotes');
-    BdApi.injectCSS('lineemotes', lineemotes.getStylesheet())
-    lineemotes.menu.init();
-    BDFDB.showToast(lineemotes.prototype.getName()+` v`+lineemotes.prototype.getVersion()+` が起動しました`, {timeout:10000, type:"success"});
-};
-
-//起動処理 ここまで
-
-//停止処理
-lineemotes.prototype.stop = function () {
-    //デバッグログ | DEBUG LOG
-    //console.info(`%c[${lineemotes.prototype.getName()}/stop] %cプラグインを停止しています... %c| %c絵文字メニューをデフォルトに戻しています...`, 'color: greenyellow;', 'color: red', 'color: white;', 'color: lawngreen');
-    lineemotes.menu.unload();
-    BdApi.clearCSS('lineemotes');
-    BDFDB.showToast(lineemotes.prototype.getName()+` v`+lineemotes.prototype.getVersion()+` が停止しました`, {timeout:10000, type:"error"});
-};
-
-lineemotes.prototype.unload = function () {
-    lineemotes.log('Unloading');
-};
-
-lineemotes.prototype.onMessage = function () {
-    //メッセージを受け取った時に呼び出される
-};
-
-lineemotes.prototype.onSwitch = function () {
-    //サーバーまたはチャンネルを切り替えた時(切り替える時)に呼び出される
-};
-
-lineemotes.prototype.settings = function () {};
-lineemotes.prototype.settings.toggleHide = function () {
-    let checked = bdPluginStorage.get(lineemotes.storage.getName(), 'hideURLs')
-    lineemotes.log(`Toggling hide, was ${checked}`)
-    if (!checked) {
-        bdPluginStorage.set(lineemotes.storage.getName(), 'hideURLs', true);
-        $('#line-settings-hideurl').parent().find('.ui-switch').addClass('checked')
-    } else {
-        bdPluginStorage.set(lineemotes.storage.getName(), 'hideURLs', false);
-        $('#line-settings-hideurl').parent().find('.ui-switch').removeClass('checked')
-    }
-};
-
-lineemotes.prototype.getSettingsPanel = function () {
-    let checked = ''
-    if (bdPluginStorage.get(lineemotes.storage.getName(), 'hideURLs') == true) { checked = 'checked=""'; }
-
-    let toggle = document.createElement('label');
-    toggle.classList.add('ui-switch-wrapper', 'ui-flex-child');
-    toggle.setAttribute('style', 'flex:0 0 auto;');
-
-    let input = document.createElement('input');
-    input.classList.add('ui-switch-checkbox');
-    input.setAttribute('id', 'line-settings-hideurl');
-    input.setAttribute('type', 'checkbox');
-    if (bdPluginStorage.get(lineemotes.storage.getName(), 'hideURLs') == true) { input.setAttribute('checked', ''); }
-    input.setAttribute('onclick', 'lineemotes.prototype.settings.toggleHide()')
-
-    let div = document.createElement('div');
-    div.classList.add('ui-switch');
-    if (bdPluginStorage.get(lineemotes.storage.getName(), 'hideURLs'))
-        div.classList.add('checked');
-
-    toggle.appendChild(input);
-    toggle.appendChild(div);
-
-    return "<div style='display:flex;'><h3 style='color:#b0b6b9;'>スタンプURLをクライアントサイドで非表示にする(本家Line Sticker の利用者用、プラグイン側で非表示にしているだけです。)</h3>" + toggle.outerHTML + "</div>";
-};
-
-lineemotes.prototype.getLocalizationStrings = function () {
-  var locale = document.children[0].getAttribute('lang');
-  var localization_strings = {
-    'bda-qem-emojis': 'Emojis',
-    'bda-qem-favourite': 'Favourite',
-    'bda-qem-line': 'LINE',
-    'addform-title': 'Title',
-    'addform-length': 'Sticker count',
-    'addform-id': 'First sticker ID',
-    'addform-add': 'Add',
-    'delete-confirm': 'Are you sure you want to delete this pack?',
-    'yes': 'Yes',
-    'no': 'No'
   }
-  if (locale === 'ja') {
-    localization_strings['bda-qem-emojis'] = '絵文字',
-    localization_strings['bda-qem-favourite'] = 'お気に入り'
-    localization_strings['addform-title'] = 'タイトル',
-    localization_strings['addform-length'] = 'スタンプの数',
-    localization_strings['addform-id'] = '最初のスタンプID',
-    localization_strings['addform-add'] = '追加',
-    localization_strings['delete-confirm'] = 'このパックを削除しますか？',
-    localization_strings['yes'] = 'はい',
-    localization_strings['no'] = 'いいえ'
-  }
-
-  return localization_strings;
 }
 
-//logger function, outputs console message in '[Line Stickers] <message>' format
-lineemotes.log = (message) => console.info(`%c[${lineemotes.prototype.getName()}] ${message}`, 'color: greenyellow;');
-lineemotes.getBDRepo = () => {
-    var script_url = $("script[src*='BetterDiscordApp']").attr('src').split('/')
-    if (script_url[4] !== 'BetterDiscordApp')
-        throw ReferenceError(`Error in getBDRepo(), expected 'BetterDiscordApp', found '${script_url[4]}'`)
-    return script_url[3]
-};
+function initialize() {
 
-lineemotes.prototype.getName = () => "Line Stickers";
-lineemotes.prototype.getDescription = () => "Extends emote menu to add Line stickers.";
-//lineemotes.prototype.getVersion = () => "0.6.9c";
-lineemotes.prototype.getAuthor = () => "Awakening | Edit by ryuuta0217";
-
-
-lineemotes.categories = function() {}
-
-lineemotes.categories.buildContainer = function() {
-    var container = '';
-    var categories = '';
-
-
-    var storage = lineemotes.storage.get();
-    if (storage) {
-        for (var pack = 0; pack < storage.length; ++pack) {
-            categories += `<div class="item" data-id="${storage[pack]['starting_id']}" onclick="$('#bda-qem-line-container .line-pack')[${pack}].scrollIntoView()" style='background-image: url("https://sdl-stickershop.line.naver.jp/stickershop/v1/sticker/${storage[pack]['starting_id']}/android/sticker.png;compress=true")'></div>`;
-        }
-    }
-    var localization_strings = lineemotes.prototype.getLocalizationStrings();
-    var numbersOnly = "return event.charCode >= 48 && event.charCode <= 57";
-    container += `
-<div class="add-form" style="opacity: 0; pointer-events: none;">
-    <div class="labels">
-        <label for="line-add-title">${localization_strings['addform-title']}</label>
-        <label for="line-add-length">${localization_strings['addform-length']}</label>
-        <label for="line-add-id">${localization_strings['addform-id']}</label>
-    </div>
-    <div class="inputs">
-        <input id="line-add-title" placeholder="${localization_strings['addform-title']}">
-        <input id="line-add-length" onkeypress="${numbersOnly}" placeholder="${localization_strings['addform-length']}" value="40">
-        <input id="line-add-id" onkeypress="${numbersOnly}" placeholder="${localization_strings['addform-id']}">
-    </div>
-
-    <button type="button" class="line-add-button ui-button filled brand small">
-        <div class="ui-button-contents">${localization_strings['addform-add']}</div>
-    </button>
-</div>
-<div class="categories-container">
-    <div class="categories-wrapper">
-        <div class="item add-pack-button">
-            <svg class="add-pack" width="20" height="20" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"></path>
-            </svg>
-        </div>
-        ${categories}
-    </div>
-</div>
-`;
-    return container;
-};
-
-lineemotes.categories.init = function () {
-    lineemotes.editbar.init();
-    $('#bda-qem-line-container .categories-container .categories-wrapper').bind('mousewheel', function(event) {
-	if ((event.originalEvent.wheelDelta || event.originalEvent.detail) > 0)
-            this.scrollLeft -= 25;
-        else
-            this.scrollLeft += 25;
-	return false;
-    });
-    $('#bda-qem-line-container .categories-container .add-pack').off('click');
-    $('#bda-qem-line-container .categories-container .add-pack').on('click', (event) => {
-        var state = $('#bda-qem-line-container .add-form').css('opacity');
-        if (state == '1') {
-            $('#bda-qem-line-container .categories-container .add-pack').addClass('icon-plus');
-            $('#bda-qem-line-container .categories-container .add-pack').removeClass('icon-minus');
-            $('#bda-qem-line-container .add-form').css('opacity', '0');
-            $('#bda-qem-line-container .add-form').css('pointer-events', 'none');
-        }
-        else if (state == '0') {
-            $('#bda-qem-line-container .categories-container .add-pack').addClass('icon-minus');
-            $('#bda-qem-line-container .categories-container .add-pack').removeClass('icon-plus');
-            $('#bda-qem-line-container .add-form').css('opacity', '1');
-            $('#bda-qem-line-container .add-form').css('pointer-events', 'unset');
-        }
-    });
-
-    var state = {
-        'id': false,
-        'length': true,
-        'title': false
-    };
-
-    function validate() {
-        function clearAndSet(target, state) {
-            $(target).removeClass('valid');
-            $(target).removeClass('invalid');
-            $(target).addClass(state);
-        }
-        if (state['id'] && state['length'] && state['title']) {
-            clearAndSet($('#bda-qem-line-container .line-add-button'), 'valid');
-            return true;
-        } else {
-            clearAndSet($('#bda-qem-line-container .line-add-button'), 'invalid');
-            return false;
-        }
-    }
-
-    $(`#line-add-title`).off();
-    $(`#line-add-length`).off();
-    $(`#line-add-id`).off();
-
-    $(`#line-add-title`).keyup((event) => {
-        if ($(event.target).val()) state['title'] = true;
-        else state['title'] = false;
-        validate();
-    });
-    $(`#line-add-length`).keyup((event) => {
-        if (Number($(event.target).val())) state['length'] = true;
-        else state['length'] = false;
-        validate();
-    });
-    $(`#line-add-id`).keyup((event) => {
-        if (Number($(event.target).val().trim())) state['id'] = true;
-        else state['id'] = false;
-        validate();
-    });
-
-    $('#bda-qem-line-container .line-add-button').off('click');
-    $('#bda-qem-line-container .line-add-button').mouseenter((event) => {
-        validate();
-    });
-    $('#bda-qem-line-container .line-add-button').on('click', (event) => {
-        if (validate()) {
-            var title = $('#line-add-title').val().trim();
-            var length = $('#line-add-length').val().trim();
-            var id = $('#line-add-id').val().trim();
-            lineemotes.appendPack(title, id, length);
-            $('#line-add-title').val('');
-            $('#line-add-length').val(40);
-            $('#line-add-id').val('');
-        }
-    });
-};
-
-lineemotes.menu = function () {}
-
-lineemotes.menu.init = function () {
-    quickEmoteMenu.lsContainer = this.buildContainer();
-
-    // overriding
-    // adding line tab into the callback function
-    QuickEmoteMenu.prototype.obsCallback = function(elem) {
-            var e = $(elem);
-            // Emotes - Show Discord emoji menu
-            if (!settingsCookie["bda-es-9"])
-                e.addClass("bda-qme-hidden");
-            else
-                e.removeClass("bda-qme-hidden");
-
-            // rebuild container if the language was changed
-            var localization_strings = lineemotes.prototype.getLocalizationStrings();
-            if (this.locale === undefined) {
-                this.locale = document.children[0].getAttribute('lang');
-            } else if (this.locale !== document.children[0].getAttribute('lang')) {
-                lineemotes.log('Language changed, rebuilding container to reflect changes')
-                this.locale = document.children[0].getAttribute('lang');
-                this.lsContainer = lineemotes.menu.buildContainer();
-            }
-
-            // avoid unnecessary whitespace
-            var qmeHeader = `<div id="bda-qem">`
-            qmeHeader += `<button class="active" id="bda-qem-twitch" onclick='quickEmoteMenu.switchHandler(this); return false;'>Twitch</button>`
-            qmeHeader += `<button id="bda-qem-favourite" onclick='quickEmoteMenu.switchHandler(this); return false;'>${localization_strings['bda-qem-favourite']}</button>`
-            qmeHeader += `<button id="bda-qem-emojis" onclick='quickEmoteMenu.switchHandler(this); return false;'>${localization_strings['bda-qem-emojis']}</button>`
-            qmeHeader += `<button id="bda-qem-line" onclick="quickEmoteMenu.switchHandler(this); return false;">${localization_strings['bda-qem-line']}</button>`
-            qmeHeader += `<div>`
-            e.prepend(qmeHeader);
-
-            // Emotes - Show Twitch/Favourite
-            if (settingsCookie["bda-es-0"]) {
-                e.append(this.teContainer);
-                e.append(this.faContainer);
-                e.removeClass("bda-qme-te-hidden");
-            } else {
-                e.addClass("bda-qme-te-hidden");
-            }
-
-            e.append(this.lsContainer);
-
-            // if twitch/favourite tab and discord emoji tab disabled
-            if ((!settingsCookie["bda-es-0"]) && (!settingsCookie["bda-es-9"]))
-                this.lastTab = "bda-qem-line";
-
-            // if twitch/favourite tab is disabled and the last open tab was one of them
-            if (((this.lastTab == 'bda-qem-emojis') || (this.lastTab == 'bda-qem-favourite')) && (!settingsCookie["bda-es-0"]))
-                this.lastTab = "bda-qem-emojis";
-
-            // if discord emoji tab is disabled and it was the last open tab
-            if ((this.latTab == 'bda-qem-emojis') && (!settingsCookie["bda-es-9"]))
-                this.lastTab = "bda-qem-favourite";
-
-            if (this.lastTab === undefined)
-                // if twitch tab is disabled, default to discord emoji tab
-                if (!settingsCookie["bda-es-0"])
-                    this.lastTab = 'bda-qem-emojis';
-                else
-                    this.lastTab = "bda-qem-favourite";
-
-            this.switchQem(this.lastTab);
-    };
-    // initializing stuff,
-    // making the tab openable, copying sticker URL into text area on click, initializing on-hover preview
-    QuickEmoteMenu.prototype.switchQem = function(id) {
-            var twitch = $("#bda-qem-twitch");
-            var fav = $("#bda-qem-favourite");
-            var emojis = $("#bda-qem-emojis");
-            var line = $("#bda-qem-line");
-            twitch.removeClass("active");
-            fav.removeClass("active");
-            emojis.removeClass("active");
-            line.removeClass("active");
-
-            $(".emojiPicker-3m1S-j, .emojiPicker-3g68GS").hide();
-            $("#bda-qem-favourite-container").hide();
-            $("#bda-qem-twitch-container").hide();
-            $("#bda-qem-line-container").hide();
-
-            switch (id) {
-            case "bda-qem-twitch":
-                twitch.addClass("active");
-                $("#bda-qem-twitch-container").show();
-                break;
-            case "bda-qem-favourite":
-                fav.addClass("active");
-                $("#bda-qem-favourite-container").show();
-                break;
-            case "bda-qem-emojis":
-                emojis.addClass("active");
-                $(".emojiPicker-3m1S-j, .emojiPicker-3g68GS").show();
-                $(".emojiPicker-3m1S-j .search-bar-inner input, .emojiPicker-3g68GS .search-bar-inner input").focus();
-                break
-            case "bda-qem-line":
-                line.addClass("active");
-                $("#bda-qem-line-container").show();
-                break
-            }
-            this.lastTab = id;
-
-
-            //クリックした時の処理
-            var emoteIcon = $(".emote-icon");
-            emoteIcon.off();
-            emoteIcon.on("click", function() {
-                // find out what tab we're dealing with
-                if ($(this).parent().parent().hasClass("line-pack-stickers")) {
-                    // if dealing with line stickers tab, grab src
-                    var emote = $(this).attr("src") // + '\n';
-                } else {
-                    // otherwise grab title attribute
-                    var emote = $(this).attr("title");
-                }
-                /* Text(URL) ver.
-                // var ta = utils.getTextArea();
-                var ta = $('.channelTextArea-1LDbYG textarea');
-                utils.insertText(ta[0], ta.val().slice(-1) == " " ? ta.val() + emote : ta.val() + " " + emote)
-                // force the textarea to resize if needed
-                ta[0].dispatchEvent(new Event('input', { bubbles: true })); */
-                
-            //埋込みリンク版 | Embed ver.
-            var image = {url : emote};
-            var channelID = window.location.pathname.split('/').pop();
-            var embed = 	{	type : "rich" };
-            if (image) { embed.image = image; }
-            var data = JSON.stringify({embed : embed});
-            //デバッグログ || DEBUG LOG
-            //console.info(`%c[${lineemotes.prototype.getName()}/embed] %cデータ(JSON): `+data, 'color: greenyellow;', 'color: gold');
-
-            //Get Token || Token取得
-            var isError = false;
-            if(token == null || typeof token === "undefined") {
-                try {
-                    var DiscordLocalStorageProxy = document.createElement('iframe');
-                    DiscordLocalStorageProxy.style.display = 'none';
-                    DiscordLocalStorageProxy.id = 'DiscordLocalStorageProxy';
-                    document.body.appendChild(DiscordLocalStorageProxy);
-                    //デバッグログ | DEBUG LOG
-                    //console.info(`%c[${lineemotes.prototype.getName()}/line-440] %cTOKEN(NOT REPLACED): `+DiscordLocalStorageProxy.contentWindow.localStorage.token, 'color: greenyellow;', 'color: gold');
-                    token = DiscordLocalStorageProxy.contentWindow.localStorage.token.replace(/"/g, "");
-                
-                    //デバッグログ | DEBUG LOG
-                    //console.info(`%c[${lineemotes.prototype.getName()}/getToken] %cTokenを取得しました: `+token, 'color: greenyellow;', 'color: crimson');
-                    BDFDB.showToast(`Tokenを取得しました: `+token, {timeout:4000, type:"default"});
-                    BDFDB.showToast(`このTokenはDiscordが再読み込みされるまで保持されます`, {timeout:4000, type:"warn"});
-                } catch(e) {
-                    isError = true;
-                    BDFDB.showToast(`Tokenの取得に失敗しました。`, {timeout:4000, type:"error"});
-                    BDFDB.showToast(`Ctrl+Rで再読み込みすると治る可能性があります。`, {timeout:4000, type:"error"});
-                }
-            }
-
-            //送信 | Send
-            $.ajax({
-                type : "POST",
-                url : "https://discordapp.com/api/channels/" + channelID + "/messages",
-                headers : {
-                    "authorization": token
-                },
-                dataType : "json",
-                contentType : "application/json",
-                data: data,
-                error: (req, error, exception) => {
-                    isError = true;
-                    BDFDB.showToast(`エラーが発生しました: ${req.responseText.replace('{"code": 0, "message": "401: Unauthorized"}', "HTTP 401: 認証されていません")}`, {timeout:4000, type:"error"});
-                    //デバッグログ | DEBUG LOG
-                    //console.error(`An Internal Error occured: ${req.responseText.replace('{"code": 0, "message": "401: Unauthorized"}', "HTTP 401: 認証されていません")}`);
-                }
-            });
-
-            if(!isError) {
-                //デバッグログ | DEBUG LOG
-                //console.info(`%c[${lineemotes.prototype.getName()}/embed] %cスタンプ(Embed)を送信しました`, 'color: greenyellow;', 'color: lime'); //check
-                BDFDB.showToast(`スタンプを送信しました`, {timeout:2000, type:"success"});
-            } else {
-                //デバッグログ | DEBUG LOG
-                //console.error(`%c[${lineemotes.prototype.getName()}/embed] %cスタンプ(Embed)の送信に失敗しました`, 'color: greenyellow;', 'color: lime'); //check
-                BDFDB.showToast(`スタンプの送信に失敗しました`, {timeout:4000, type:"error"});
-            }
-
-            /*
-            //一時的に取得したTokenを削除 | Remove Token
-            delete DiscordLocalStorageProxy;
-            var token = "0";
-
-            //デバッグログ | DEBUG LOG
-            console.info(`%c[${lineemotes.prototype.getName()}/post-process] %cToken Check: `+token, 'color: greenyellow;', 'color: white'); //check
-            if(token == "0") {
-                //console.info(`%c[${lineemotes.prototype.getName()}/post-process] %cTokenを削除しました`, 'color: greenyellow;', 'color: lawngreen');
-                //BDFDB.showToast(`保存していたTokenを削除しました`, {timeout:2500, type:"success"});
-            } else {
-                //console.info(`%c[${lineemotes.prototype.getName()}/post-process] %cTokenを削除できませんでした`, 'color: greenyellow;', 'color: crimson');
-                BDFDB.showToast(`保存していたTokenを削除できませんでした`, {timeout:2500, type:"danger"});
-            }*/
-
-            });
-            lineemotes.preview.init();
-            lineemotes.categories.init();
-            lineemotes.confirm.init();
-            lineemotes.menu.resize();
-    };
-};
-
-lineemotes.menu.buildContainer = function () {
-    var stickers = '';
-    var storage = lineemotes.storage.get();
-
-    for (var pack = 0; pack < storage.length; ++pack) {
-        stickers += lineemotes.pack.wrapPack(storage[pack]['starting_id']);
-    }
-
-    // var container = `${lineemotes.getStylesheet()}
-    var container = `
-<div id="bda-qem-line-container">
-    <div class="scrollerWrap-2lJEkd scrollerFade-1Ijw5y">
-        ${lineemotes.confirm.buildContainer()}
-        <div class="scroller-2FKFPG">
-            <div class="emote-menu-inner">
-                ${stickers}
-            </div>
-        </div>
-    </div>
-    ${lineemotes.preview.buildContainer()}
-    ${lineemotes.categories.buildContainer()}
-</div>`;
-    return container;
-};
-
-lineemotes.menu.rebuild = function () {
-    lineemotes.log('Rebuilding container');
-    quickEmoteMenu.lsContainer = this.buildContainer();
-};
-
-lineemotes.menu.unload = function () {
-    // reverting the overriden functions
-    QuickEmoteMenu.prototype.obsCallback = function (elem) {
-        var e = $(elem);
-        if(!settingsCookie["bda-es-9"]) {
-            e.addClass("bda-qme-hidden");
-        } else {
-            e.removeClass("bda-qme-hidden");
-        }
-    
-        if(!settingsCookie["bda-es-0"]) return;
-    
-        e.prepend(this.qmeHeader);
-        e.append(this.teContainer);
-        e.append(this.faContainer);
-    
-        if(this.lastTab == undefined) {
-            this.lastTab = "bda-qem-favourite";
-        } 
-        this.switchQem(this.lastTab);
-    };
-    QuickEmoteMenu.prototype.switchQem = function(id) {
-        var twitch = $("#bda-qem-twitch");
-        var fav = $("#bda-qem-favourite");
-        var emojis = $("#bda-qem-emojis");
-        twitch.removeClass("active");
-        fav.removeClass("active");
-        emojis.removeClass("active");
-    
-        $(".emojiPicker-3m1S-j, .emojiPicker-3g68GS").hide();
-        $("#bda-qem-favourite-container").hide();
-        $("#bda-qem-twitch-container").hide();
-    
-        switch(id) {
-            case "bda-qem-twitch":
-                twitch.addClass("active");
-                $("#bda-qem-twitch-container").show();
-            break;
-            case "bda-qem-favourite":
-                fav.addClass("active");
-                $("#bda-qem-favourite-container").show();
-            break;
-            case "bda-qem-emojis":
-                emojis.addClass("active");
-                $(".emojiPicker-3m1S-j, .emojiPicker-3g68GS").show();
-                $(".emojiPicker-3m1S-j .search-bar-inner input, .emojiPicker-3g68GS .search-bar-inner input").focus();
-            break;
-        }
-        this.lastTab = id;
-    
-        var emoteIcon = $(".emote-icon");
-        emoteIcon.off();
-        emoteIcon.on("click", function () {
-            var emote = $(this).attr("title");
-            var ta = utils.getTextArea();
-            utils.insertText(ta[0], ta.val().slice(-1) == " " ? ta.val() + emote : ta.val() + " " + emote);
-        });
-    };
-
-    // setting the last opened tab to emoji tab
-    quickEmoteMenu.lastTab = "bda-qem-emojis"
-};
-
-
-lineemotes.menu.setWidth = function(width) {
-    if (width < 344) { width = 344; lineemotes.log("Can't set width less than 344px"); }
-    bdPluginStorage.set('lineemotes', 'width', width);
-    lineemotes.menu.resize();
-};
-
-lineemotes.menu.setHeight = function(height) {
-    if (height < 326) { height = 326; lineemotes.log("Can't set height less than 326px"); }
-    bdPluginStorage.set('lineemotes', 'height', height);
-    lineemotes.menu.resize();
-};
-
-lineemotes.menu.setSize = function(width, height) {
-    lineemotes.menu.setWidth(width);
-    lineemotes.menu.setHeight(height);
-};
-
-lineemotes.menu.getWidth = function(width) { return bdPluginStorage.get('lineemotes', 'width'); };
-lineemotes.menu.getHeight = function(height) { return bdPluginStorage.get('lineemotes', 'height'); };
-lineemotes.menu.getSize = function(width, height) {
-    return {
-        width: lineemotes.menu.getWidth(width),
-        height: lineemotes.menu.getHeight(height)
-    };
-};
-
-lineemotes.menu.resize = function() {
-    if (!lineemotes.menu.open()) return;
-    var width = bdPluginStorage.get('lineemotes', 'width');
-    var height = bdPluginStorage.get('lineemotes', 'height');
-    if (width === null) { lineemotes.menu.setWidth(0); return; }
-    if (height === null) { lineemotes.menu.setHeight(0); return; }
-
-    $('#bda-qem-line-container').css('width', width);
-    $('#bda-qem-line-container').css('height', height);
-
-    var qem_height = 30;
-    if ((!settingsCookie["bda-es-0"]) && (!settingsCookie["bda-es-9"]))
-        qem_height = 0;
-
-    BdApi.clearCSS('lineemotes-offset');
-    BdApi.injectCSS('lineemotes-offset', `:root {--bd-les-offset: ${qem_height}px; --bd-les-border-offset:1px; --bd-les-height: ${height}px; --bd-les-width: ${width}px;}`)
-    // $('#bda-qem-line-container .preview-wrapper').css('height', height + qem_height);
-    // $('#bda-qem-line-container .preview-wrapper').css('transform', `translateX(-258px) translateY(-${height + qem_height + 1}px) translateZ(0px)`);
-
-    // $('#bda-qem-line-container .categories-container').css('width', width - 15);
-    // $('#bda-qem-line-container .add-form').css('width', width - 45);
-    // $('#line-add-title').css('width', width - 220);
-    // $('#line-add-length').css('width', width - 220);
-    // $('#line-add-id').css('width', width - 219);
-};
-
-// remove sticker pack from current container
-lineemotes.menu.removePack = function(id) {
-    $(`#bda-qem-line-container .line-pack[data-id="${id}"]`).remove();
-    $(`#bda-qem-line-container .categories-container .item[data-id="${id}"]`).remove();
-};
-
-lineemotes.menu.appendPack = function(id) {
-    if (!lineemotes.menu.open()) return;
-    lineemotes.log('Appending a pack to the current container');
-    // append the pack to the current container
-    var pack = lineemotes.pack.wrapPack(id);
-    $('#bda-qem-line-container .emote-menu-inner').append(pack);
-
-    // append the pack to navigation bar below
-    var pack = lineemotes.storage.getPack(id);
-    var id = pack['starting_id'];
-    var position = $('#bda-qem-line-container .categories-wrapper .item').length - 1;
-    var category = `<div class="item" data-id="${id}" onclick="$('#bda-qem-line-container .line-pack')[${position}].scrollIntoView()" style='background-image: url("https://sdl-stickershop.line.naver.jp/stickershop/v1/sticker/${id}/android/sticker.png;compress=true")'></div>`;
-    $('#bda-qem-line-container .categories-wrapper').append(category);
-
-    // enable preview on the added pack
-    // make stickers copy url on a click
-    $(`#bda-qem-line-container .line-pack[data-id="${id}"] img`)
-        .mouseenter(function(e) { lineemotes.preview.show(e.target.src); })
-        .mouseleave(function(e) { lineemotes.preview.hide(); })
-        .on("click", function() {
-            // find out what tab we're dealing with
-            if ($(this).parent().parent().hasClass("line-pack-stickers")) {
-                // if dealing with line stickers tab, grab src
-                var emote = $(this).attr("src") // + '\n';
-            } else {
-                // otherwise grab title attribute
-                var emote = $(this).attr("title");
-            }
-            var ta = utils.getTextArea();
-            utils.insertText(ta[0], ta.val().slice(-1) == " " ? ta.val() + emote : ta.val() + " " + emote)
-            // force the textarea to resize if needed
-            ta[0].dispatchEvent(new Event('input', { bubbles: true }));
-        });
-
-    // enable deletion
-    $(`#bda-qem-line-container .line-pack[data-id="${id}"] .icon-plus-cross`).on('click', (event) => {
-        var id = $(event.target.parentNode.parentNode.parentNode).attr('data-id');
-        $('#bda-qem-line-container .confirm .yes').attr(
-            'onclick',
-            `lineemotes.storage.deletePack(${id}); lineemotes.menu.removePack(${id}); lineemotes.confirm.hide();`);
-        lineemotes.confirm.show();
-    });
-
-    // enable editing
-    $(`#bda-qem-line-container .line-pack[data-id="${id}"] .icon-edit`).on('click', (event) => {
-        var pack = $(event.target.parentNode.parentNode.parentNode);
-        if (pack.find('.line-pack-header input').length === 0) {
-            var bar = $(event.target.parentNode.parentNode);
-            var header = pack.find('.line-pack-header');
-            var value = pack.find('.line-pack-header').text();
-            header.html(`<input class="line-edit-input" value="${value}"></input>`);
-            bar.addClass('visible')
-
-            function save(event) {
-                var value = $(event.target).val();
-                var id = $(event.target.parentNode.parentNode).attr('data-id');
-                lineemotes.storage.renamePack(id, value);
-                $(event.target.parentNode).html(value);
-            }
-
-            header.find('input')
-                .on('blur', (event) => {
-                    save(event);
-                    bar.removeClass('visible');
-                })
-                .on('keydown', (event) => {
-                    if ((event.key === 'Escape') || (event.key ==='Enter')) {
-                        event.stopPropagation();
-                        event.preventDefault();
-                        //save(event);
-                        event.target.blur();
-                    }
-                })
-                .focus();
-        }
-    });
-};
-
-lineemotes.menu.open = function() {
-    // Check if the LINE tab is currently open and visible
-    let container = document.getElementById('bda-qem-line-container')
-    if (container) {
-        let display = container.style.display;
-        if (display !== 'none') return true;
-    }
-    return false
-};
-
-
-
-lineemotes.prototype.observer = function (mutation) {
-    var status = bdPluginStorage.get(lineemotes.storage.getName(), 'hideURLs');
-    if (status === null) {
-        status = false;
-    }
-    if (status === true) {
-            for (var i = 0; i < mutation.addedNodes.length; ++i) {
-            var next = mutation.addedNodes.item(i);
-            if (next) {
-                var nodes = this.observer.getNodes(next);
-                for (var node in nodes) {
-                    if (nodes.hasOwnProperty(node)) {
-                        var element = nodes[node].parentElement;
-                        if (element) {
-                            // skip code blocks
-                            if (element.tagName !== 'CODE') {
-                                if (element.classList.contains('edited')) { 
-                                    // if message with a sticker was edited, apply the sticker url hide
-                                    this.observer.inject(element); 
-                                } else {
-                                    // apply the sticker url hide
-                                    this.observer.inject(nodes[node]); 
-                                }
-                                }
-                                // if message is being edited, unhide the text
-                                if (element.tagName == "TEXTAREA" && element.style.display == "none") {
-                                    element.style.display = "";
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-};
-
-lineemotes.prototype.observer.status = function () {}
-
-lineemotes.prototype.observer.status.set = function(value) {
-    if (value === true) {
-        bdPluginStorage.set(lineemotes.storage.getName(), 'hideURLs', true)
-        this.current = true;
-    } else if (value === false) {
-        bdPluginStorage.set(lineemotes.storage.getName(), 'hideURLs', false)
-        this.current = false;
-    } else {
-        lineemotes.log('Unknown value passed while setting observer status')
-    }
 }
 
-lineemotes.prototype.observer.getNodes = function (node) {
-    var next;
-    var nodes = [];
-    var treeWalker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null, false);
-    while (next = treeWalker.nextNode()) {
-        nodes.push(next);
+var _lineemotes = function (e) {
+    var n = {};
+  
+    function t(i) {
+      if (n[i]) return n[i].exports;
+      var a = n[i] = {
+        i: i,
+        l: !1,
+        exports: {}
+      };
+      return e[i].call(a.exports, a, a.exports, t), a.l = !0, a.exports
     }
-    return nodes;
-};
-
-lineemotes.prototype.observer.inject = function (node) {
-    if ((node.textContent.match(/sdl-stickershop.line.naver.jp/g)||[]).length < 1) return
-    $(node).parent()[0].style.display = "none";
-};
-
-lineemotes.pack = function () {}
-
-lineemotes.pack.getPack = function (title, stickerid, length) {
-    var pack = {
-        title: title,
-        starting_id: Number(stickerid),
-        length: Number(length)
+    return t.m = e, t.c = n, t.d = function (e, n, i) {
+      t.o(e, n) || Object.defineProperty(e, n, {
+        enumerable: !0,
+        get: i
+      })
+    }, t.r = function (e) {
+      "undefined" != typeof Symbol && Symbol.toStringTag && Object.defineProperty(e, Symbol.toStringTag, {
+        value: "Module"
+      }), Object.defineProperty(e, "__esModule", {
+        value: !0
+      })
+    }, t.t = function (e, n) {
+      if (1 & n && (e = t(e)), 8 & n) return e;
+      if (4 & n && "object" == typeof e && e && e.__esModule) return e;
+      var i = Object.create(null);
+      if (t.r(i), Object.defineProperty(i, "default", {
+          enumerable: !0,
+          value: e
+        }), 2 & n && "string" != typeof e)
+        for (var a in e) t.d(i, a, function (n) {
+          return e[n]
+        }.bind(null, a));
+      return i
+    }, t.n = function (e) {
+      var n = e && e.__esModule ? function () {
+        return e.default
+      } : function () {
+        return e
+      };
+      return t.d(n, "a", n), n
+    }, t.o = function (e, n) {
+      return Object.prototype.hasOwnProperty.call(e, n)
+    }, t.p = "", t(t.s = 4)
+  }([function (e) {
+    e.exports = {
+      id: "lineemotes",
+      name: "bd-linestickers",
+      prettyName: "LINE Stickers",
+      description: "Extends BetterDiscord emote menu to add LINE stickers tab.",
+      version: "0.7.1",
+      scripts: {
+        build: "webpack --mode=none",
+        "build:watch": "webpack --watch --mode=development"
+      },
+      author: "Awakening | Edit by ryuuta0217",
+      private: !0,
+      contributors: [],
+      dependencies: {},
+      devDependencies: {
+        "copy-webpack-plugin": "^4.5.4",
+        "css-loader": "^0.28.11",
+        eslint: "^5.7.0",
+        "eslint-config-standard": "^11.0.0",
+        "eslint-plugin-import": "^2.14.0",
+        "eslint-plugin-node": "^6.0.1",
+        "eslint-plugin-promise": "^3.8.0",
+        "eslint-plugin-standard": "^3.1.0",
+        "node-sass": "^4.9.4",
+        pug: "^2.0.3",
+        "pug-loader": "^2.4.0",
+        "sass-loader": "^7.1.0",
+        "to-string-loader": "^1.1.5",
+        webpack: "^4.22.0",
+        "webpack-cli": "^3.1.2"
+      }
+    }
+  }, function (e, n, t) {
+    const i = t(0);
+    e.exports = function (e) {
+      console.log(`%c[${i.prettyName}] %c${e}`, "color: #01B901", "")
+    }
+  }, function (e, n, t) {
+    "use strict";
+    var i = Object.prototype.hasOwnProperty;
+  
+    function a(e, n) {
+      return Array.isArray(e) ? function (e, n) {
+        for (var t, i = "", r = "", o = Array.isArray(n), d = 0; d < e.length; d++)(t = a(e[d])) && (o && n[d] && (t = s(t)), i = i + r + t, r = " ");
+        return i
+      }(e, n) : e && "object" == typeof e ? function (e) {
+        var n = "",
+          t = "";
+        for (var a in e) a && e[a] && i.call(e, a) && (n = n + t + a, t = " ");
+        return n
+      }(e) : e || ""
+    }
+  
+    function r(e) {
+      if (!e) return "";
+      if ("object" == typeof e) {
+        var n = "";
+        for (var t in e) i.call(e, t) && (n = n + t + ":" + e[t] + ";");
+        return n
+      }
+      return e + ""
+    }
+  
+    function o(e, n, t, i) {
+      return !1 !== n && null != n && (n || "class" !== e && "style" !== e) ? !0 === n ? " " + (i ? e : e + '="' + e + '"') : ("function" == typeof n.toJSON && (n = n.toJSON()), "string" == typeof n || (n = JSON.stringify(n), t || -1 === n.indexOf('"')) ? (t && (n = s(n)), " " + e + '="' + n + '"') : " " + e + "='" + n.replace(/'/g, "&#39;") + "'") : ""
+    }
+    n.merge = function e(n, t) {
+      if (1 === arguments.length) {
+        for (var i = n[0], a = 1; a < n.length; a++) i = e(i, n[a]);
+        return i
+      }
+      for (var o in t)
+        if ("class" === o) {
+          var d = n[o] || [];
+          n[o] = (Array.isArray(d) ? d : [d]).concat(t[o] || [])
+        } else if ("style" === o) {
+        var d = r(n[o]);
+        d = d && ";" !== d[d.length - 1] ? d + ";" : d;
+        var s = r(t[o]);
+        s = s && ";" !== s[s.length - 1] ? s + ";" : s, n[o] = d + s
+      } else n[o] = t[o];
+      return n
+    }, n.classes = a, n.style = r, n.attr = o, n.attrs = function (e, n) {
+      var t = "";
+      for (var d in e)
+        if (i.call(e, d)) {
+          var s = e[d];
+          if ("class" === d) {
+            s = a(s), t = o(d, s, !1, n) + t;
+            continue
+          }
+          "style" === d && (s = r(s)), t += o(d, s, !1, n)
+        }
+      return t
     };
-
-    return pack;
-};
-
-lineemotes.pack.appendPack = function (title, stickerid, length) {
-    var log = lineemotes.log;
-    var storage = lineemotes.storage;
-    var pack = lineemotes.pack;
-
-    // parsing arguments
-    if (typeof title     === 'undefined') { throw 'ParsingError: Title is not defined'; }
-    if (typeof stickerid === 'undefined') { throw 'ParsingError: Sticker ID is not a defined'; }
-    if (typeof length    === 'undefined') { length = 40; log(`Length is not explicitly defined, defaulting to ${length}`); }
-
-    if (typeof title !== 'string') { throw 'ParsingError: Title is not a string'; }
-    if (Number.isInteger(stickerid) === false) {
-        if (typeof stickerid === 'string') {
-            stickerid = parseInt(stickerid, 10);
-            if (isNaN(stickerid)) {
-                throw 'ParsingError: First sticker ID is not a number';
-            } else {
-                log(`First sticker ID passed as a string, parsed as integer ${stickerid}`);
-            }
-        } else {
-            throw 'ParsingError: First sticker ID is not a number nor string';
+    var d = /["&<>]/;
+  
+    function s(e) {
+      var n = "" + e,
+        t = d.exec(n);
+      if (!t) return e;
+      var i, a, r, o = "";
+      for (i = t.index, a = 0; i < n.length; i++) {
+        switch (n.charCodeAt(i)) {
+        case 34:
+          r = "&quot;";
+          break;
+        case 38:
+          r = "&amp;";
+          break;
+        case 60:
+          r = "&lt;";
+          break;
+        case 62:
+          r = "&gt;";
+          break;
+        default:
+          continue
         }
+        a !== i && (o += n.substring(a, i)), a = i + 1, o += r
+      }
+      return a !== i ? o + n.substring(a, i) : o
     }
-    if (Number.isInteger(length) === false) {
-        if (length === null) {
-            length = 40;
-            log(`Null length passed, defaulting to ${length}`);
-        } else if (typeof length === 'string') {
-            length = parseInt(length, 10);
-            if (isNaN(length)) {
-                throw 'ParsingError: Length is not a number';
-            } else {
-                log(`Length passed as a string, parsed as integer ${length}`);
-            }
-        } else {
-            throw 'ParsingError: Length is not a number nor string';
+    n.escape = s, n.rethrow = function e(n, i, a, r) {
+      if (!(n instanceof Error)) throw n;
+      if (!("undefined" == typeof window && i || r)) throw n.message += " on line " + a, n;
+      try {
+        r = r || t(7).readFileSync(i, "utf8")
+      } catch (t) {
+        e(n, null, a)
+      }
+      var o = 3,
+        d = r.split("\n"),
+        s = Math.max(a - o, 0),
+        l = Math.min(d.length, a + o);
+      var o = d.slice(s, l).map(function (e, n) {
+        var t = n + s + 1;
+        return (t == a ? "  > " : "    ") + t + "| " + e
+      }).join("\n");
+      n.path = i;
+      n.message = (i || "Pug") + ":" + a + "\n" + o + "\n\n" + n.message;
+      throw n
+    }
+  }, function (e, n) {
+    let t = {
+      en: {
+        "bda-qem-emojis": "Emojis",
+        "bda-qem-favourite": "Favourite",
+        "bda-qem-line": "LINE",
+        "addform-title": "Title",
+        "addform-length": "Sticker count",
+        "addform-id": "First sticker ID",
+        "addform-add": "Add",
+        "delete-confirm": "Are you sure you want to delete this pack?",
+        yes: "Yes",
+        no: "No"
+      },
+      ja: {
+        "bda-qem-emojis": "絵文字",
+        "bda-qem-favourite": "お気に入り",
+        "bda-qem-line": "LINE",
+        "addform-title": "タイトル",
+        "addform-length": "スタンプの数",
+        "addform-id": "最初のスタンプID",
+        "addform-add": "追加",
+        "delete-confirm": "このパックを削除しますか？",
+        yes: "はい",
+        no: "いいえ"
+      }
+    };
+    let i = new class {
+      getCurrentLocale() {
+        return document.children[0].getAttribute("lang")
+      }
+      getToken(e) {
+        let n = this.getCurrentLocale();
+        return n in t || (n = "en"), t[n][e]
+      }
+    };
+    e.exports = i
+  }, function (e, n, t) {
+    const i = t(5),
+      a = t(8),
+      r = t(10),
+      o = t(11),
+      d = t(14),
+      s = t(16),
+      l = t(17),
+      c = t(19),
+      p = t(20),
+      u = t(0),
+      b = t(21),
+      m = t(1);
+    e.exports = class {
+      constructor() {
+        this.storage = new o, this.settings = new c, this.categories = new i, this.menu = new a, this.preview = new r, this.pack = new d(this), this.editbar = new s, this.confirm = new l, this.observer = p, window[u.id] = this
+      }
+      load() {
+        m("LINE Stickers Loaded")
+      }
+      unload() {
+        m("LINE Stickers Unloaded")
+      }
+
+      start() {
+        //デバッグログ | DEBUG LOG
+        //console.info(`%c[${lineemotes.prototype.getName()}/start] 読み込み中`, 'color: greenyellow;');
+        var libraryScript = null;
+        if (typeof BDFDB !== "object" || typeof BDFDB.isLibraryOutdated !== "function" || BDFDB.isLibraryOutdated()) {
+          libraryScript = document.querySelector('head script[src="https://mwittrien.github.io/BetterDiscordAddons/Plugins/BDFDB.js"]');
+          if (libraryScript) libraryScript.remove();
+          libraryScript = document.createElement("script");
+          libraryScript.setAttribute("type", "text/javascript");
+          libraryScript.setAttribute("src", "https://mwittrien.github.io/BetterDiscordAddons/Plugins/BDFDB.js")
+          document.head.appendChild(libraryScript);
+          //デバッグログ | DEBUG LOG
+          //console.info(`%c[${lineemotes.prototype.getName()}/start] BDFunctionDevilBro ライブラリを読み込みました`, 'color: greenyellow;');
         }
+        m("Initializing LINE Stickers"), BdApi.clearCSS("lineemotes"), BdApi.injectCSS("lineemotes", b), this.storage.initialize(), this.menu.initialize();
+        //デバッグログ | DEBUG LOG
+        //console.info(`%c[${lineemotes.prototype.getName()}/start] %cinitializePL を呼び出しています`, 'color: greenyellow;', 'color: gray;');
+	      if (typeof BDFDB === "object" && typeof BDFDB.isLibraryOutdated === "function") initializePL();
+	      else libraryScript.addEventListener("load", () => { initializePL(); });
+      }
+
+      stop() {
+        m("Stopping LINE Stickers, reverting emote menu to default"), this.menu.destroy(), BdApi.clearCSS("lineemotes")
+      }
+      onMessage() {}
+      onSwitch() {}
+      getSettingsPanel() {
+        return this.settings.getPanel()
+      }
+      getName() {
+        pl_name = u.prettyName;
+        return u.prettyName
+      }
+      getDescription() {
+        return u.description
+      }
+      getAuthor() {
+        return u.author
+      }
+      getVersion() {
+        pl_ver = u.version;
+        return u.version
+      }
     }
-
-    var stickerpack = pack.getPack(title, stickerid, length);
-    if (lineemotes.storage.getPack(stickerid) === null) {
-        storage.pushPack(stickerpack);
-        lineemotes.menu.rebuild();
-        lineemotes.menu.appendPack(stickerid);
-    } else {
-        log('Pack already exists in storage');
+  }, function (e, n, t) {
+    const i = t(0),
+      a = t(3),
+      r = t(6);
+    e.exports = class {
+      initialize() {
+        let e = window[i.id];
+        e.editbar.initializeAll(), $("#bda-qem-line-container .categories-container .categories-wrapper").bind("mousewheel", function (e) {
+          return (e.originalEvent.wheelDelta || e.originalEvent.detail) > 0 ? this.scrollLeft -= 25 : this.scrollLeft += 25, !1
+        }), $("#bda-qem-line-container .categories-container .add-pack").off("click"), $("#bda-qem-line-container .categories-container .add-pack").on("click", e => {
+          let n = $("#bda-qem-line-container .add-form").css("opacity");
+          "1" === n ? ($("#bda-qem-line-container .categories-container .add-pack").addClass("icon-plus"), $("#bda-qem-line-container .categories-container .add-pack").removeClass("icon-minus"), $("#bda-qem-line-container .add-form").css("opacity", "0"), $("#bda-qem-line-container .add-form").css("pointer-events", "none")) : "0" === n && ($("#bda-qem-line-container .categories-container .add-pack").addClass("icon-minus"), $("#bda-qem-line-container .categories-container .add-pack").removeClass("icon-plus"), $("#bda-qem-line-container .add-form").css("opacity", "1"), $("#bda-qem-line-container .add-form").css("pointer-events", "unset"))
+        });
+        var n = {
+          id: !1,
+          length: !0,
+          title: !1
+        };
+  
+        function t() {
+          function e(e, n) {
+            $(e).removeClass("valid"), $(e).removeClass("invalid"), $(e).addClass(n)
+          }
+          return n.id && n.length && n.title ? (e("#bda-qem-line-container .line-add-button", "valid"), !0) : (e("#bda-qem-line-container .line-add-button", "invalid"), !1)
+        }
+        $("#line-add-title").off(), $("#line-add-length").off(), $("#line-add-id").off(), $("#line-add-title").keyup(e => {
+          $(e.target).val() ? n.title = !0 : n.title = !1, t()
+        }), $("#line-add-length").keyup(e => {
+          Number($(e.target).val()) ? n.length = !0 : n.length = !1, t()
+        }), $("#line-add-id").keyup(e => {
+          Number($(e.target).val().trim()) ? n.id = !0 : n.id = !1, t()
+        }), $("#bda-qem-line-container .line-add-button").off("click"), $("#bda-qem-line-container .line-add-button").off("mouseenter"), $("#bda-qem-line-container .line-add-button").on("mouseenter", e => t()), $("#bda-qem-line-container .line-add-button").on("click", n => {
+          if (!t()) return;
+          let i = $("#line-add-title").val().trim(),
+            a = $("#line-add-length").val().trim(),
+            r = $("#line-add-id").val().trim();
+          e.pack.addPack(i, r, a), $("#line-add-title").val(""), $("#line-add-length").val(40), $("#line-add-id").val("")
+        })
+      }
+      buildContainer() {
+        let e = "",
+          n = window[i.id].storage.get("stickers");
+        if (n)
+          for (var t = 0; t < n.length; ++t) {
+            let i = n[t],
+              a = `$('#bda-qem-line-container .line-pack[data-id=${i.startingId}]')[0].scrollIntoView()`,
+              r = `background-image: url("https://sdl-stickershop.line.naver.jp/stickershop/v1/sticker/${i.startingId}/android/sticker.png;compress=true")`;
+            e += `<div class="item" data-id="${i.startingId}" onclick="${a}" style='${r}'></div>`
+          }
+        return r({
+          addformTitle: a.getToken("addform-title"),
+          addformLength: a.getToken("addform-length"),
+          addformId: a.getToken("addform-id"),
+          addformAdd: a.getToken("addform-add"),
+          categories: e
+        })
+      }
     }
-    return true;
-};
-
-// alias
-lineemotes.appendPack = function (title, stickerid, length) {
-    this.pack.appendPack(title, stickerid, length);
-};
-
-lineemotes.pack.wrapPack = function (stickerid) {
-    var pack = lineemotes.storage.getPack(stickerid);
-    if (pack === null) { return ''; }
-    var stickers = '';
-    for (var i = 0; i < pack['length']; ++i) {
-        stickers += `<div class="emote-container"><img class="emote-icon" src="https://sdl-stickershop.line.naver.jp/stickershop/v1/sticker/${Number(pack['starting_id']) + i}/android/sticker.png;compress=true"></div>`;
+  }, function (e, n, t) {
+    var i = t(2);
+    e.exports = function (e) {
+      var n, t = "",
+        a = e || {};
+      return function (e, a, r, o, d) {
+        t = t + '<div class="add-form" style="opacity: 0; pointer-events: none;"><div class="labels"><label for="line-add-title">' + i.escape(null == (n = o) ? "" : n) + '</label><label for="line-add-length">' + i.escape(null == (n = r) ? "" : n) + '</label><label for="line-add-id">' + i.escape(null == (n = a) ? "" : n) + '</label></div><div class="inputs"><input id="line-add-title"' + i.attr("placeholder", o, !0, !0) + '><input id="line-add-length" onkeypress="return event.charCode &gt;= 48 &amp;&amp; event.charCode &lt;= 57"' + i.attr("placeholder", r, !0, !0) + ' value="40"><input id="line-add-id" onkeypress="return event.charCode &gt;= 48 &amp;&amp; event.charCode &lt;= 57"' + i.attr("placeholder", a, !0, !0) + '></div><button class="line-add-button ui-button filled brand small"><div class="ui-button-contents">' + i.escape(null == (n = e) ? "" : n) + '</div></button></div><div class="categories-container"><div class="categories-wrapper"><div class="item add-pack-button"><svg class="add-pack" width="20" height="20" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"></path></svg></div>' + (null == (n = d) ? "" : n) + "</div></div>"
+      }.call(this, "addformAdd" in a ? a.addformAdd : "undefined" != typeof addformAdd ? addformAdd : void 0, "addformId" in a ? a.addformId : "undefined" != typeof addformId ? addformId : void 0, "addformLength" in a ? a.addformLength : "undefined" != typeof addformLength ? addformLength : void 0, "addformTitle" in a ? a.addformTitle : "undefined" != typeof addformTitle ? addformTitle : void 0, "categories" in a ? a.categories : "undefined" != typeof categories ? categories : void 0), t
     }
-    var container = `
-<div class="line-pack" data-id="${pack['starting_id']}">
-    <div class="line-editbar">
-        <span class="item">
-            <svg class="icon-plus-cross" width="18" height="18" style="opacity:0.6;">
-                <g fill="none" fill-rule="evenodd">
-                    <path d="M0 0h18v18H0" stroke-width="2px"></path>
-                    <path stroke="#FFF" d="M4.5 4.5l9 9" stroke-linecap="round" stroke-width="2px"></path>
-                    <path stroke="#FFF" d="M13.5 4.5l-9 9" stroke-linecap="round" stroke-width="2px"></path>
-                </g>
-            </svg>
-        </span>
-        <span class="item">
-            <svg class="icon-edit" width="18" height="18">
-                <path fill="#737F8D" fill-rule="evenodd" d="M3 14v-2.5l7.88-7.85c.19-.2.51-.2.71 0l1.76 1.76c.2.2.2.51 0 .71L5.47 14H3zm12 0H7.5l2-2H15v2z"/>
-            </svg>
-        </span>
+  }, function (e, n) {}, function (e, n, t) {
+    const i = t(0),
+      a = t(1),
+      r = t(3),
+      o = t(9);
+    e.exports = class {
+      initialize() {
+        this.restore = {
+          obsCallback: QuickEmoteMenu.prototype.obsCallback,
+          switchQem: QuickEmoteMenu.prototype.switchQem
+        }, quickEmoteMenu.lsContainer = this.buildContainer(), QuickEmoteMenu.prototype.obsCallback = function (e) {
+          let n = $(e);
+          settingsCookie["bda-es-9"] ? n.removeClass("bda-qme-hidden") : n.addClass("bda-qme-hidden"), this.locale ? this.locale !== document.children[0].getAttribute("lang") && (a("Language changed, rebuilding container to reflect changes"), this.locale = r.getCurrentLocale(), this.lsContainer = window[i.id].menu.buildContainer()) : this.locale = r.getCurrentLocale();
+          let t = '<div id="bda-qem">';
+          t += '<button class="active" id="bda-qem-twitch" onclick="quickEmoteMenu.switchHandler(this); return false;">Twitch</button>', t += `<button id="bda-qem-favourite" onclick="quickEmoteMenu.switchHandler(this); return false;">${r.getToken("bda-qem-favourite")}</button>`, t += `<button id="bda-qem-emojis" onclick="quickEmoteMenu.switchHandler(this); return false;">${r.getToken("bda-qem-emojis")}</button>`, t += `<button id="bda-qem-line" onclick="quickEmoteMenu.switchHandler(this); return false;">${r.getToken("bda-qem-line")}</button>`, t += "<div>", n.prepend(t), settingsCookie["bda-es-0"] ? (n.append(this.teContainer), n.append(this.faContainer), n.removeClass("bda-qme-te-hidden")) : n.addClass("bda-qme-te-hidden"), n.append(this.lsContainer), settingsCookie["bda-es-0"] || settingsCookie["bda-es-9"] || (this.lastTab = "bda-qem-line"), "bda-qem-emojis" !== this.lastTab && "bda-qem-favourite" !== this.lastTab || settingsCookie["bda-es-0"] || (this.lastTab = "bda-qem-emojis"), "bda-qem-emojis" !== this.latTab || settingsCookie["bda-es-9"] || (this.lastTab = "bda-qem-favourite"), this.lastTab || (settingsCookie["bda-es-0"] ? this.lastTab = "bda-qem-favourite" : this.lastTab = "bda-qem-emojis"), this.switchQem(this.lastTab)
+        }, QuickEmoteMenu.prototype.switchQem = function (e) {
+          let n = $("#bda-qem-twitch"),
+            t = $("#bda-qem-favourite"),
+            a = $("#bda-qem-emojis"),
+            r = $("#bda-qem-line");
+          switch (n.removeClass("active"), t.removeClass("active"), a.removeClass("active"), r.removeClass("active"), $(".emojiPicker-3m1S-j").hide(), $("#bda-qem-favourite-container").hide(), $("#bda-qem-twitch-container").hide(), $("#bda-qem-line-container").hide(), e) {
+          case "bda-qem-twitch":
+            n.addClass("active"), $("#bda-qem-twitch-container").show();
+            break;
+          case "bda-qem-favourite":
+            t.addClass("active"), $("#bda-qem-favourite-container").show();
+            break;
+          case "bda-qem-emojis":
+            a.addClass("active"), $(".emojiPicker-3m1S-j").show(), $(".emojiPicker-3m1S-j .search-bar-inner input").focus();
+            break;
+          case "bda-qem-line":
+            r.addClass("active"), $("#bda-qem-line-container").show()
+          }
+          this.lastTab = e;
+          let o = $(".emote-icon");
+          o.off(), o.on("click", function (e) {
+            window[i.id].menu.onEmoteClick(e.target)
+          }), window[i.id].preview.initialize(), window[i.id].categories.initialize(), window[i.id].confirm.initializeAll(), window[i.id].menu.resize()
+        }
+      }
+      buildContainer() {
+        var e = "";
+        let n = window[i.id].storage.get("stickers");
+        for (var t = 0; t < n.length; ++t) e += window[i.id].pack.wrapPack(n[t].startingId);
+        return o({
+          confirm: window[i.id].confirm.buildContainer(),
+          stickers: e,
+          preview: window[i.id].preview.buildContainer(),
+          categories: window[i.id].categories.buildContainer()
+        })
+      }
+      rebuild() {
+        a("Rebuilding container"), quickEmoteMenu.lsContainer = this.buildContainer()
+      }
+      destroy() {
+        QuickEmoteMenu.prototype.obsCallback = this.restore.obsCallback, QuickEmoteMenu.prototype.switchQem = this.restore.switchQem, quickEmoteMenu.lastTab = "bda-qem-emojis"
+      }
+      setWidth(e) {
+        e < 344 && (e = 344, a("Can't set width less than 344px")), window[i.id].storage.set("width", e), this.resize()
+      }
+      setHeight(e) {
+        e < 326 && (e = 326, a("Can't set height less than 326px")), window[i.id].storage.set("height", e), this.resize()
+      }
+      setSize(e, n) {
+        this.setWidth(e), this.setHeight(n)
+      }
+      getWidth() {
+        return window[i.id].storage.get("width")
+      }
+      getHeight() {
+        return window[i.id].storage.get("height")
+      }
+      getSize() {
+        return {
+          width: this.getWidth(),
+          height: this.getHeight()
+        }
+      }
+      resize() {
+        if (!this.isOpen()) return;
+        let e = this.getWidth(),
+          n = this.getHeight();
+        if (null === e) return void this.setWidth(0);
+        if (null === n) return void this.setHeight(0);
+        $("#bda-qem-line-container").css("width", e), $("#bda-qem-line-container").css("height", n);
+        let t = 30;
+        settingsCookie["bda-es-0"] || settingsCookie["bda-es-9"] || (t = 0), BdApi.clearCSS("lineemotes-offset"), BdApi.injectCSS("lineemotes-offset", `:root {--bd-les-offset: ${t}px; --bd-les-border-offset:1px; --bd-les-height: ${n}px; --bd-les-width: ${e}px;}`)
+      }
+      removePack(e) {
+        $(`#bda-qem-line-container .line-pack[data-id="${e}"]`).remove(), $(`#bda-qem-line-container .categories-container .item[data-id="${e}"]`).remove()
+      }
+      appendPack(e) {
+        if (!this.isOpen()) return;
+        a("Appending a pack to the current container");
+        var n = window[i.id].pack.wrapPack(e);
+        $("#bda-qem-line-container .emote-menu-inner").append(n);
+        var t = `<div class="item" data-id="${e=(n=window[i.id].storage.getPack(e)).startingId}" onclick="$('#bda-qem-line-container .line-pack')[${$("#bda-qem-line-container .categories-wrapper .item").length-1}].scrollIntoView()" style='background-image: url("https://sdl-stickershop.line.naver.jp/stickershop/v1/sticker/${e}/android/sticker.png;compress=true")'></div>`;
+        $("#bda-qem-line-container .categories-wrapper").append(t);
+        let r = $(`#bda-qem-line-container .line-pack[data-id="${e}"] img`);
+        r.mouseenter(function (e) {
+          window[i.id].preview.show(e.target.src)
+        }).mouseleave(function (e) {
+          window[i.id].preview.hide()
+        }).on("click", () => this.onStickerClick(r)), window[i.id].confirm.initializeOne(e), window[i.id].editbar.initializeOne(e)
+      }
+      isOpen() {
+        let e = document.getElementById("bda-qem-line-container");
+        return !(!e || "none" === e.style.display)
+      }
+      onEmoteClick(e) {
+        let n = $(e).parent().parent(),
+          t = $(e),
+          i = n.hasClass("line-pack-stickers") ? t.attr("src") : t.attr("title"),
+          a = Utils.getTextArea();
+        
+        console.warn("== DATAS AT ==")
+        console.log(n);
+        console.log(t);
+        console.log(i);
+        console.log(a);
+        console.warn("== DATAS END ==")
 
-        <span class="item" style="display: none; text-align: center; width: 30px; vertical-align: middle; line-height: 23.5px; color: #d1d1d1;">
-            <span class="icon-edit-len">LEN</span>
-        </span>
-    </div>
-    <div class="line-pack-header">${pack['title']}</div>
-    <div class="line-pack-stickers">
-        ${stickers}
-    </div>
-</div>`;
-    return container;
-};
+        //埋込みリンク版 | Embed ver.
+        var image = {url : i};
+        var channelID = window.location.pathname.split('/').pop();
+        var embed = 	{	type : "rich" };
+        if (image) { embed.image = image; }
+        var data = JSON.stringify({embed : embed});
+        //デバッグログ || DEBUG LOG
+        console.info(`%c[${pl_name}/embed] %cデータ(JSON): `+data, 'color: greenyellow;', 'color: gold');
 
-// bar with buttons to remove pack, edit title and length
-// embeded into each pack, code above ^
-lineemotes.editbar = function() {}
-
-lineemotes.editbar.init = function () {
-    $('#bda-qem-line-container .line-editbar .icon-edit').off('click');
-    $('#bda-qem-line-container .line-editbar .icon-edit').on('click', (event) => {
-        var pack = $(event.target.parentNode.parentNode.parentNode);
-        if (pack.find('.line-pack-header input').length === 0) {
-            var bar = $(event.target.parentNode.parentNode);
-            var header = pack.find('.line-pack-header');
-            var value = pack.find('.line-pack-header').text();
-            header.html(`<input class="line-edit-input" value="${value}"></input>`);
-            bar.addClass('visible')
-
-            function save(event) {
-                var value = $(event.target).val();
-                var id = $(event.target.parentNode.parentNode).attr('data-id');
-                lineemotes.storage.renamePack(id, value);
-                $(event.target.parentNode).html(value);
-            }
+        //Get Token || Token取得
+        var isError = false;
+        if(token == null || typeof token === "undefined") {
+            try {
+                var DiscordLocalStorageProxy = document.createElement('iframe');
+                DiscordLocalStorageProxy.style.display = 'none';
+                DiscordLocalStorageProxy.id = 'DiscordLocalStorageProxy';
+                document.body.appendChild(DiscordLocalStorageProxy);
+                //デバッグログ | DEBUG LOG
+                //console.info(`%c[${pl_name}/line-440] %cTOKEN(NOT REPLACED): `+DiscordLocalStorageProxy.contentWindow.localStorage.token, 'color: greenyellow;', 'color: gold');
+                token = DiscordLocalStorageProxy.contentWindow.localStorage.token.replace(/"/g, "");
             
-            header.find('input')
-                .on('blur', (event) => {
-                    save(event);
-                    bar.removeClass('visible');  // FIXME doesn't actually gets removed
-                })
-                .on('keydown', (event) => {
-                    if ((event.key === 'Escape') || (event.key ==='Enter')) {
-                        event.stopPropagation();
-                        event.preventDefault();
-                        //save(event);
-                        event.target.blur();
-                    }
-                })
-                .focus();
+                //デバッグログ | DEBUG LOG
+                //console.info(`%c[${pl_name}/getToken] %cTokenを取得しました: `+token, 'color: greenyellow;', 'color: crimson');
+                BDFDB.showToast(`Tokenを取得しました: `+token, {timeout:4000, type:"default"});
+                BDFDB.showToast(`このTokenはDiscordが再読み込みされるまで保持されます`, {timeout:4000, type:"warn"});
+            } catch(e) {
+                isError = true;
+                BDFDB.showToast(`Tokenの取得に失敗しました。`, {timeout:4000, type:"error"});
+                BDFDB.showToast(`Ctrl+Rで再読み込みすると治る可能性があります。`, {timeout:4000, type:"error"});
+            }
         }
-    });
-};
 
-// used to confirm delete action
-lineemotes.confirm = function () {}
+        //送信 | Send
+        $.ajax({
+            type : "POST",
+            url : "https://discordapp.com/api/channels/" + channelID + "/messages",
+            headers : {
+                "authorization": token
+            },
+            dataType : "json",
+            contentType : "application/json",
+            data: data,
+            error: (req, error, exception) => {
+                isError = true;
+                BDFDB.showToast(`エラーが発生しました: ${req.responseText.replace('{"code": 0, "message": "401: Unauthorized"}', "HTTP 401: 認証されていません")}`, {timeout:4000, type:"error"});
+                //デバッグログ | DEBUG LOG
+                //console.error(`An Internal Error occured: ${req.responseText.replace('{"code": 0, "message": "401: Unauthorized"}', "HTTP 401: 認証されていません")}`);
+            }
+        });
 
-lineemotes.confirm.buildContainer = function () {
-  var localization_strings = lineemotes.prototype.getLocalizationStrings();
-  var container = '';
-  container += `
-<div class="confirm" style="opacity: 0; pointer-events: none;">
-    <div class="box">
-        <h3 class="value"></h3>
-        <h3 style="padding: 10px;">${localization_strings['delete-confirm']}</h3>
-        <div>
-            <span class="yes">${localization_strings['yes']}</span>
-            <span class="no" onclick="lineemotes.confirm.hide();">${localization_strings['no']}</span>
-        </div>
-    </div>
-</div>`;
-  return container;
-};
-
-lineemotes.confirm.show = function() {
-    //$('#bda-qem-line-container .confirm').show();
-    $('#bda-qem-line-container .confirm').css('opacity', '1');
-    $('#bda-qem-line-container .confirm').css('pointer-events', 'unset');
-};
-
-lineemotes.confirm.hide = function() {
-    //$('#bda-qem-line-container .confirm').hide();
-    $('#bda-qem-line-container .confirm').css('opacity', '0');
-    $('#bda-qem-line-container .confirm').css('pointer-events', 'none');
-    $('#bda-qem-line-container .confirm .yes').attr('onclick', '');
-};
-
-lineemotes.confirm.init = function () {
-    $('#bda-qem-line-container .line-editbar .icon-plus-cross').on('click', (event) => {
-        var id = $(event.target.parentNode.parentNode.parentNode).attr('data-id');
-        $('#bda-qem-line-container .confirm .yes').attr(
-            'onclick',
-            `lineemotes.storage.deletePack(${id}); lineemotes.menu.removePack(${id}); lineemotes.confirm.hide();`);
-        lineemotes.confirm.show();
-    });
-};
-
-lineemotes.preview = function() {}
-
-lineemotes.preview.buildContainer = function() {
-    var container = '';
-    container += `
-<div class="preview-container">
-    <div class="preview-wrapper" style="visibility: hidden; opacity: 0; background-size: inherit;"></div>
-</div>`;
-    return container;
-}
-
-lineemotes.preview.init = function() {
-    $('#bda-qem-line-container .emote-menu-inner img')
-        .mouseenter(function(e) { lineemotes.preview.show(e.target.src); })
-        .mouseleave(function(e) { lineemotes.preview.hide(); });
-};
-
-lineemotes.preview.show = function(url) {
-    var preview = $('#bda-qem-line-container .preview-container .preview-wrapper');
-    preview.css('visibility', 'visible');
-    preview.css('opacity', '1');
-    // preview.css('background', `url("${url}") rgb(53, 53, 53) no-repeat center`);
-    preview.css('background-image', `url("${url}")`);
-};
-
-lineemotes.preview.hide = function() {
-    var preview = $('#bda-qem-line-container .preview-container .preview-wrapper');
-    preview.css('visibility', 'hidden');
-    preview.css('opacity', '0');
-};
-
-
-lineemotes.storage = function () {}
-
-lineemotes.storage.getName = function () { return 'lineemotes' }
-
-lineemotes.storage.get = function () {
-    var storage = bdPluginStorage.get(this.getName(), 'stickers');
-    if (typeof storage === 'undefined' || storage === null) {
-        // if storage is not declared, declare it
-        bdPluginStorage.set(this.getName(), 'stickers', []);
-        storage = [];
-    }
-    return storage;
-};
-
-lineemotes.storage.set = function(value) {
-    bdPluginStorage.set(this.getName(), 'stickers', value);
-};
-
-lineemotes.storage.wipe = function () {
-    bdPluginStorage.set(this.getName(), 'stickers', []);
-    return null
-};
-
-lineemotes.storage.pushPack = function (pack) {
-    var log = lineemotes.log;
-    if (this.getPack(pack['starting_id']) === null) {
-        var storage = this.get();
-        storage.push(pack);
-        this.set(storage);
-        log(`Successfully added pack '${pack['title']}' to the storage`);
-        return true;
-    } else {
-        log('Pack is already in storage, aborting');
-    }
-};
-
-lineemotes.storage.getPack = function(id) {
-    var storage = this.get();
-    for (var i = 0; i < storage.length; i++) {
-	if (storage[i]['starting_id'] == id) {
-            return storage[i];
-        }
-    }
-    return null;
-};
-
-/*
-lineemotes.storage.getPackID = function(id) {
-    // look up the pack by one of its sticker IDs or its name
-    var log = lineemotes.log;
-    var mode;
-    
-    if (typeof id === 'number') {
-        if (Number.isInteger(id) === false) {
-            throw 'ParsingError: ID cannot be float';
+        if(!isError) {
+            //デバッグログ | DEBUG LOG
+            //console.info(`%c[${pl_name}/embed] %cスタンプ(Embed)を送信しました`, 'color: greenyellow;', 'color: lime'); //check
+            BDFDB.showToast(`スタンプを送信しました`, {timeout:2000, type:"success"});
         } else {
-            mode = 'integer';
+            //デバッグログ | DEBUG LOG
+            //console.error(`%c[${pl_name}/embed] %cスタンプ(Embed)の送信に失敗しました`, 'color: greenyellow;', 'color: lime'); //check
+            BDFDB.showToast(`スタンプの送信に失敗しました`, {timeout:4000, type:"error"});
         }
-    } 
-    if (typeof id === 'string') {
-        mode = 'string';
+        
+        //Utils.insertText(a[0], " " === a.val().slice(-1) ? a.val() + i : a.val() + " " + i), a[0].dispatchEvent(new Event("input", {bubbles: !0}))
+      }
     }
-    
-    var storage = this.get();
-    if (mode === 'integer') {
-        for (var index = 0; index < storage.length; index++) {
-            for (var sticker = 0; sticker < storage[index].stickers.length; sticker++) {
-                if (storage[index]['stickers'][sticker] === id) {
-                    return storage[index];
-                }
+  }, function (e, n, t) {
+    t(2);
+    e.exports = function (e) {
+      var n, t = "",
+        i = e || {};
+      return function (e, i, a, r) {
+        t = t + '<div id="bda-qem-line-container"><div class="scrollerWrap-2lJEkd scrollerFade-1Ijw5y">' + (null == (n = i) ? "" : n) + '<div class="scroller-2FKFPG"><div class="emote-menu-inner">' + (null == (n = r) ? "" : n) + "</div></div></div>" + (null == (n = a) ? "" : n) + (null == (n = e) ? "" : n) + "</div>"
+      }.call(this, "categories" in i ? i.categories : "undefined" != typeof categories ? categories : void 0, "confirm" in i ? i.confirm : "undefined" != typeof confirm ? confirm : void 0, "preview" in i ? i.preview : "undefined" != typeof preview ? preview : void 0, "stickers" in i ? i.stickers : "undefined" != typeof stickers ? stickers : void 0), t
+    }
+  }, function (e, n, t) {
+    const i = t(0);
+    e.exports = class {
+      buildContainer() {
+        let e = '<div class="preview-container">';
+        return e += '<div class="preview-wrapper" style="visibility: hidden; opacity: 0; background-size: inherit;">', e += "</div>"
+      }
+      initialize() {
+        $("#bda-qem-line-container .emote-menu-inner img").mouseenter(function (e) {
+          window[i.id].preview.show(e.target.src)
+        }).mouseleave(function (e) {
+          window[i.id].preview.hide()
+        })
+      }
+      show(e) {
+        var n = $("#bda-qem-line-container .preview-container .preview-wrapper");
+        n.css("visibility", "visible"), n.css("opacity", "1"), n.css("background-image", `url("${e}")`)
+      }
+      hide() {
+        var e = $("#bda-qem-line-container .preview-container .preview-wrapper");
+        e.css("visibility", "hidden"), e.css("opacity", "0")
+      }
+    }
+  }, function (e, n, t) {
+    const i = t(12),
+      a = t(0),
+      r = t(13);
+    e.exports = class extends i {
+      initialize() {
+        this.get("stickers") || this.set("stickers", []), this.get("width") || this.set("width", 344), this.get("height") || this.set("height", 326), r(this)
+      }
+      get(e) {
+        return window.BdApi.getData(a.id, e)
+      }
+      set(e, n) {
+        window.BdApi.setData(a.id, e, n)
+      }
+    }
+  }, function (e, n, t) {
+    const i = t(1),
+      a = t(0);
+    e.exports = class {
+      initialize() {
+        throw Error("Not implemented")
+      }
+      get() {
+        throw Error("Not implemented")
+      }
+      set() {
+        throw Error("Not implemented")
+      }
+      getPack(e) {
+        let n = this.get("stickers");
+        for (let t = 0; t < n.length; t++)
+          if (n[t].startingId === e) return n[t]
+      }
+      addPack(e) {
+        if (this.getPack(e.startingId)) return void i("Pack is already in storage, aborting");
+        let n = this.get("stickers");
+        n.push(e), this.set("stickers", n), i(`Successfully added pack '${e.title}' to the storage`)
+      }
+      deletePack(e) {
+        let n = this.get("stickers");
+        for (let t = 0; t < n.length; t++)
+          if (n[t].startingId === e) return i(`Deleting pack ${e} - ${n[t].title}`), n.splice(t, 1), this.set("stickers", n), void window[a.id].menu.rebuild();
+        i(`Pack ${e} was not found in storage during deletion`)
+      }
+      swapPack(e, n) {
+        let t = this.get("stickers"),
+          a = t[e];
+        t[e] = t[n], t[n] = a, this.set("stickers", t), i(`Successfully swapped packs '${t[n].title}' and '${t[e].title}'`)
+      }
+      renamePack(e, n) {
+        if (!this.getPack(e)) return void i(`Pack ${e} was not found in storage`);
+        let t = this.get("stickers");
+        for (let i = 0; i < t.length; i++)
+          if (t[i].startingId === e) return t[i].title = n, this.set("stickers", t), void window[a.id].menu.rebuild()
+      }
+    }
+  }, function (e, n, t) {
+    const i = t(1);
+    let a = 2;
+    e.exports = function (e) {
+      let n = e.get("version");
+      switch (n || (n = 1), n) {
+      case 1:
+        i("Migrating storage from version 1 to version 2");
+        let t = e.get("stickers");
+        for (let e = 0; e < t.length; e++) t[e].startingId = parseInt(t[e].starting_id), delete t[e].starting_id;
+        e.set("stickers", t)
+      }
+      e.set("version", a)
+    }
+  }, function (e, n, t) {
+    const i = t(1),
+      a = t(15);
+    e.exports = class {
+      constructor(e) {
+        this.storage = e.storage, this.menu = e.menu, e.appendPack = this.addPack.bind(this)
+      }
+      getPack(e, n, t) {
+        return {
+          title: e,
+          startingId: Number(n),
+          length: Number(t)
+        }
+      }
+      addPack(e, n, t) {
+        function a(e, n) {
+          if (!Number.isInteger(n)) {
+            if ("string" != typeof n) throw Error(`Parsing: ${e} is not a number nor string`);
+            if (n = parseInt(n, 10), isNaN(n)) throw Error(`Parsing: ${e} is not a number`);
+            i(`${e} was passed as string, parsed as integer ${n}`)
+          }
+          return n
+        }
+        if (!e) throw Error("Parsing: Title is not defined");
+        if ("string" != typeof e) throw Error("Parsing: Title is not a string");
+        if (!n) throw Error("Parsing: Sticker ID is not a defined");
+        n = a("First sticker ID", n), t || i(`Length is not explicitly defined, defaulting to ${t=40}`), t = a("Length", t);
+        let r = this.storage;
+        if (r.getPack(n)) return void i("Pack already exists in storage");
+        let o = this.getPack(e, n, t);
+        r.addPack(o), this.menu.rebuild(), this.menu.appendPack(n)
+      }
+      wrapPack(e) {
+        let n = this.storage.getPack(e);
+        if (n) return a(n)
+      }
+    }
+  }, function (e, n, t) {
+    var i = t(2);
+    e.exports = function (e) {
+      var n, t = "",
+        a = e || {};
+      return function (e, a, r) {
+        t = t + '<div class="line-pack"' + i.attr("data-id", a, !0, !0) + '><div class="line-editbar"><span class="item"><svg class="icon-plus-cross" width="18" height="18" style="opacity:0.6"><g fill="none" fill-rule="evenodd"><path d="M0 0h18v18H0" stroke-width="2px"></path><path stroke="#FFF" d="M4.5 4.5l9 9" stroke-linecap="round" stroke-width="2px"></path><path stroke="#FFF" d="M13.5 4.5l-9 9" stroke-linecap="round" stroke-width="2px"></path></g></svg></span><span class="item"><svg class="icon-edit" width="18" height="18"><path fill="#737F8D" fill-rule="evenodd" d="M3 14v-2.5l7.88-7.85c.19-.2.51-.2.71 0l1.76 1.76c.2.2.2.51 0 .71L5.47 14H3zm12 0H7.5l2-2H15v2z"></path></svg></span></div><div class="line-pack-header">' + i.escape(null == (n = r) ? "" : n) + '</div><div class="line-pack-stickers">';
+        for (let n = a; n < a + e; n++) t = t + '<div class="emote-container"><img class="emote-icon"' + i.attr("src", "https://sdl-stickershop.line.naver.jp/stickershop/v1/sticker/" + n + "/android/sticker.png;compress=true", !0, !0) + "></div>";
+        t += "</div></div>"
+      }.call(this, "length" in a ? a.length : "undefined" != typeof length ? length : void 0, "startingId" in a ? a.startingId : "undefined" != typeof startingId ? startingId : void 0, "title" in a ? a.title : "undefined" != typeof title ? title : void 0), t
+    }
+  }, function (e, n, t) {
+    const i = t(0);
+    e.exports = class {
+      fire(e) {
+        let n = $(e.target.parentNode.parentNode.parentNode);
+        if (0 === n.find(".line-pack-header input").length) {
+          let t = $(e.target.parentNode.parentNode),
+            a = n.find(".line-pack-header"),
+            r = n.find(".line-pack-header").text();
+          a.html(`<input class="line-edit-input" value="${r}"></input>`), t.addClass("visible"), a.find("input").on("blur", e => {
+            let n = $(e.currentTarget).val(),
+              a = parseInt($(e.target.parentNode.parentNode).attr("data-id"));
+            window[i.id].storage.renamePack(a, n), $(e.target.parentNode).html(n), t.removeClass("visible")
+          }).on("keydown", e => {
+            "Escape" !== e.key && "Enter" !== e.key || (e.stopPropagation(), e.preventDefault(), e.target.blur())
+          }).focus()
+        }
+      }
+      initializeAll() {
+        $("#bda-qem-line-container .line-editbar .icon-edit").off("click"), $("#bda-qem-line-container .line-editbar .icon-edit").on("click", e => {
+          this.fire(e)
+        })
+      }
+      initializeOne(e) {
+        $(`#bda-qem-line-container .line-pack[data-id="${e}"] .icon-edit`).on("click", e => {
+          this.fire(e)
+        })
+      }
+    }
+  }, function (e, n, t) {
+    const i = t(0),
+      a = t(3),
+      r = t(18);
+    e.exports = class {
+      buildContainer() {
+        return r({
+          title: a.getToken("delete-confirm"),
+          yes: a.getToken("yes"),
+          no: a.getToken("no")
+        })
+      }
+      fire(e) {
+        let n = $(e.currentTarget.parentNode.parentNode.parentNode).attr("data-id");
+        $("#bda-qem-line-container .confirm .no").attr("onclick", `window['${i.id}'].confirm.hide()`), $("#bda-qem-line-container .confirm .yes").attr("onclick", `window['${i.id}'].storage.deletePack(${n}); window['${i.id}'].menu.removePack(${n}); window['${i.id}'].confirm.hide()`), this.show()
+      }
+      initializeAll() {
+        $("#bda-qem-line-container .line-editbar .icon-plus-cross").on("click", e => this.fire(e))
+      }
+      initializeOne(e) {
+        $(`#bda-qem-line-container .line-pack[data-id="${e}"] .icon-plus-cross`).on("click", e => this.fire(e))
+      }
+      show() {
+        $("#bda-qem-line-container .confirm").css("opacity", "1"), $("#bda-qem-line-container .confirm").css("pointer-events", "unset")
+      }
+      hide() {
+        $("#bda-qem-line-container .confirm").css("opacity", "0"), $("#bda-qem-line-container .confirm").css("pointer-events", "none"), $("#bda-qem-line-container .confirm .yes").attr("onclick", "")
+      }
+    }
+  }, function (e, n, t) {
+    var i = t(2);
+    e.exports = function (e) {
+      var n, t = "",
+        a = e || {};
+      return function (e, a, r) {
+        t = t + '<div class="confirm" style="opacity: 0; pointer-events: none"><div class="box"><h3>' + i.escape(null == (n = a) ? "" : n) + '</h3><div><span class="yes">' + i.escape(null == (n = r) ? "" : n) + '</span><span class="no">' + i.escape(null == (n = e) ? "" : n) + "</span></div></div></div>"
+      }.call(this, "no" in a ? a.no : "undefined" != typeof no ? no : void 0, "title" in a ? a.title : "undefined" != typeof title ? title : void 0, "yes" in a ? a.yes : "undefined" != typeof yes ? yes : void 0), t
+    }
+  }, function (e, n, t) {
+    const i = t(0),
+      a = t(1);
+    e.exports = class {
+      toggleHide() {
+        let e = window[i.id].storage.get("hideURLs");
+        e ? (a(`Setting URL hide to 'false', was '${e}'`), window[i.id].storage.set("hideURLs", !1), $("#line-settings-hideurl").parent().find(".ui-switch").removeClass("checked")) : (a(`Setting URL hide to 'true', was '${e}'`), window[i.id].storage.set("hideURLs", !0), $("#line-settings-hideurl").parent().find(".ui-switch").addClass("checked"))
+      }
+      getPanel() {
+        let e = window[i.id].storage.get("hideURLs"),
+          n = document.createElement("label");
+        n.classList.add("ui-switch-wrapper", "ui-flex-child"), n.setAttribute("style", "flex: 0 0 auto");
+        let t = document.createElement("input");
+        t.classList.add("ui-switch-checkbox"), t.setAttribute("id", "line-settings-hideurl"), t.setAttribute("type", "checkbox"), e && t.setAttribute("checked", ""), t.setAttribute("onclick", `window['${i.id}'].settings.toggleHide()`);
+        let a, r = document.createElement("div");
+        return r.classList.add("ui-switch"), e && r.classList.add("checked"), n.appendChild(t), n.appendChild(r), a = '<div style="display:flex">', a += '<h3 style="color: #b0b6b9">スタンプURLをクライアントサイドで非表示にする<br>(Line Sticker の利用者用、プラグイン側で非表示にしているだけです。)</h3>', a += n.outerHTML, a += "</div>"
+      }
+    }
+  }, function (e, n, t) {
+    function i(e) {
+      let n, t = [],
+        i = document.createTreeWalker(e, NodeFilter.SHOW_TEXT, null, !1);
+      for (; n = i.nextNode();) t.push(n);
+      return t
+    }
+  
+    function a(e) {
+      (e.textContent.match(/sdl-stickershop.line.naver.jp/g) || []).length < 1 || ($(e).parent()[0].style.display = "none")
+    }
+    e.exports = function (e) {
+      const n = t(0);
+      if (window[n.id].storage.get("hideURLs"))
+        for (let n = 0; n < e.addedNodes.length; ++n) {
+          let t = e.addedNodes.item(n);
+          if (!t) continue;
+          let r = i(t);
+          for (let e in r) {
+            if (!r.hasOwnProperty(e)) continue;
+            let n = r[e].parentElement;
+            n && ("CODE" !== n.tagName && (n.classList.contains("edited") ? a(n) : a(r[e])), "TEXTAREA" === n.tagName && "none" === n.style.display && (n.style.display = ""))
+          }
+        }
+    }
+  }, function (e, n, t) {
+    var i = t(22);
+    e.exports = "string" == typeof i ? i : i.toString()
+  }, function (e, n, t) {
+    (e.exports = t(23)(!1)).push([e.i, "#bda-qem-line-container .icon-edit {\n  filter: grayscale(100%); }\n\n#bda-qem-line-container .add-form {\n  position: absolute;\n  display: flex;\n  bottom: 48px;\n  width: calc(var(--bd-les-width) - 45px);\n  transition: opacity .1s ease-in-out .05s;\n  background: inherit;\n  padding: 15px;\n  border-top: 1px solid rgba(0, 0, 0, 0.1);\n  text-transform: uppercase;\n  background-color: #fff; }\n  #bda-qem-line-container .add-form .labels, #bda-qem-line-container .add-form .inputs {\n    display: flex;\n    flex-direction: column;\n    margin-right: 10px;\n    font-size: 12px;\n    line-height: 17px; }\n    #bda-qem-line-container .add-form .labels input::-webkit-input-placeholder, #bda-qem-line-container .add-form .inputs input::-webkit-input-placeholder {\n      color: rgba(152, 170, 182, 0.5); }\n    #bda-qem-line-container .add-form .labels input, #bda-qem-line-container .add-form .inputs input {\n      border-bottom: solid 1px; }\n    #bda-qem-line-container .add-form .labels #line-add-title,\n    #bda-qem-line-container .add-form .labels #line-add-length,\n    #bda-qem-line-container .add-form .labels #line-add-id, #bda-qem-line-container .add-form .inputs #line-add-title,\n    #bda-qem-line-container .add-form .inputs #line-add-length,\n    #bda-qem-line-container .add-form .inputs #line-add-id {\n      width: 100%;\n      height: 16px; }\n  #bda-qem-line-container .add-form .inputs {\n    flex-grow: 1; }\n  #bda-qem-line-container .add-form .line-add-button {\n    top: 1px;\n    width: 35px;\n    height: auto;\n    padding: 0px;\n    border-radius: 3px;\n    background-color: #98aab6; }\n  #bda-qem-line-container .add-form .line-add-button.invalid:hover {\n    background-color: #ad0000 !important; }\n  #bda-qem-line-container .add-form .line-add-button.valid:hover {\n    background-color: #15ad00 !important; }\n\n.popout.bda-qme-te-hidden #bda-qem-twitch, .popout.bda-qme-te-hidden #bda-qem-favourite {\n  display: none; }\n\n.popout.bda-qme-hidden.bda-qme-te-hidden #bda-qem {\n  display: none; }\n\n.popout.bda-qme-hidden.bda-qme-te-hidden #bda-qem-line-container {\n  border-radius: 5px; }\n\n#bda-qem button {\n  box-shadow: #EFEFEF 1px 0 0 0; }\n\n#bda-qem-twitch,\n#bda-qem-favourite {\n  border-radius: unset; }\n\n#bda-qem-line {\n  border-radius: 5px 0 0 0; }\n\n.bda-dark .emoji-picker {\n  border-color: #2b2b2b; }\n  .bda-dark .emoji-picker .search-bar {\n    border-radius: 0 4px 4px 0px; }\n\n.bda-dark #bda-qem {\n  border-bottom: 1px solid #2b2b2b !important; }\n  .bda-dark #bda-qem button {\n    box-shadow: #2b2b2b 1px 0 0 0; }\n\n.bda-dark #bda-qem-line-container {\n  background-color: #353535;\n  border-color: #2b2b2b; }\n  .bda-dark #bda-qem-line-container .scroller::-webkit-scrollbar,\n  .bda-dark #bda-qem-line-container .scroller::-webkit-scrollbar-track,\n  .bda-dark #bda-qem-line-container .scroller::-webkit-scrollbar-track-piece {\n    background-color: #303030 !important;\n    border-color: #303030 !important; }\n  .bda-dark #bda-qem-line-container .scroller::-webkit-scrollbar-thumb {\n    border-color: #202020 !important;\n    background-color: #202020 !important; }\n  .bda-dark #bda-qem-line-container .categories-container .categories-wrapper {\n    background-color: #353535; }\n  .bda-dark #bda-qem-line-container .preview-container .preview-wrapper {\n    background-color: #353535;\n    border-color: #2b2b2b; }\n  .bda-dark #bda-qem-line-container .confirm {\n    background-color: rgba(35, 35, 35, 0.8); }\n  .bda-dark #bda-qem-line-container .add-form {\n    background-color: #353535; }\n  .bda-dark #bda-qem-line-container .add-pack {\n    opacity: 1; }\n\n.popout.bda-qme-hidden.bda-qme-te-hidden #bda-qem-line-container {\n  border-top-width: 1px; }\n\n#bda-qem-line-container {\n  border-radius: 0 0 5px 5px;\n  font-weight: 800;\n  color: #98aab6;\n  background-color: #fff;\n  border-width: 0px 1px 1px 1px;\n  border-style: solid;\n  border-color: rgba(191, 191, 191, 0.2); }\n  #bda-qem-line-container .scroller-wrap {\n    height: 100%; }\n  #bda-qem-line-container .emote-menu-inner {\n    padding: 5px 15px 48px 15px; }\n  #bda-qem-line-container .line-pack-header {\n    display: flex;\n    color: #98aab6;\n    height: 12px;\n    font-size: 12px;\n    padding: 12px 0 12px 0;\n    text-transform: uppercase; }\n  #bda-qem-line-container .emote-container {\n    width: 71px;\n    height: 71px; }\n  #bda-qem-line-container .preview-container .preview-wrapper {\n    position: absolute;\n    width: 256px;\n    height: calc(var(--bd-les-height) + var(--bd-les-offset));\n    background-color: #fff;\n    background-position: center center;\n    background-repeat: no-repeat;\n    background-size: contain;\n    border-width: 1px;\n    border-style: solid;\n    border-color: rgba(191, 191, 191, 0.2);\n    border-radius: 5px;\n    box-shadow: -10px 0px 80px 0px rgba(0, 0, 0, 0.2);\n    transform: translateX(-258px) translateY(calc(0px - var(--bd-les-height) - var(--bd-les-offset) - var(--bd-les-border-offset))) translateZ(0px);\n    transition: all .15s ease-in-out .15s; }\n  #bda-qem-line-container .categories-container {\n    position: absolute;\n    width: calc(var(--bd-les-width) - 15px);\n    bottom: 1px;\n    overflow: hidden;\n    z-index: 1;\n    margin-top: -44px;\n    background-color: inherit;\n    border-top: 1px solid rgba(0, 0, 0, 0.1); }\n    #bda-qem-line-container .categories-container .categories-wrapper {\n      clear: right;\n      overflow: hidden;\n      white-space: nowrap;\n      background-color: #fff; }\n      #bda-qem-line-container .categories-container .categories-wrapper .item:first-of-type {\n        margin-left: 15px;\n        margin-right: 0px; }\n      #bda-qem-line-container .categories-container .categories-wrapper .item:nth-child(2) {\n        margin-left: 0px; }\n      #bda-qem-line-container .categories-container .categories-wrapper .item:hover {\n        filter: grayscale(0%); }\n      #bda-qem-line-container .categories-container .categories-wrapper .item {\n        display: inline-block;\n        box-sizing: border-box;\n        cursor: pointer;\n        width: 28px;\n        height: 44px;\n        margin-right: 4px;\n        margin-left: 2.5px;\n        background-position: center;\n        background-repeat: no-repeat;\n        background-size: 32px 32px;\n        border-bottom: 3px solid transparent;\n        filter: grayscale(100%);\n        transition: filter .1s ease-in-out; }\n  #bda-qem-line-container .visible {\n    opacity: 1 !important; }\n  #bda-qem-line-container .line-pack input {\n    width: 100%; }\n  #bda-qem-line-container .line-pack .line-editbar:hover {\n    opacity: 1; }\n  #bda-qem-line-container .line-pack .line-editbar {\n    float: right;\n    display: flex;\n    padding-top: 10px;\n    opacity: 0;\n    transition: opacity .1s ease-in-out; }\n    #bda-qem-line-container .line-pack .line-editbar .item {\n      display: inline-block;\n      width: 22px;\n      height: 22px;\n      opacity: 0.5;\n      transition: opacity .1s ease-in-out .05s; }\n    #bda-qem-line-container .line-pack .line-editbar .item:hover {\n      opacity: 1; }\n  #bda-qem-line-container input:focus {\n    box-shadow: 0px 2px 0px 0px;\n    outline: none; }\n  #bda-qem-line-container input {\n    color: #98aab6;\n    background-color: inherit;\n    border: none;\n    margin: 0;\n    height: 12px;\n    padding: 0px;\n    font-size: 12px;\n    font-weight: 800;\n    text-transform: uppercase; }\n  #bda-qem-line-container .box {\n    width: 100%;\n    color: #98aab6;\n    text-align: center;\n    transform: translateY(250%); }\n  #bda-qem-line-container .confirm {\n    position: absolute;\n    width: 100%;\n    height: 100%;\n    background-color: rgba(255, 255, 255, 0.8);\n    transition: opacity .1s ease-in-out .05s;\n    z-index: 10; }\n    #bda-qem-line-container .confirm .yes, #bda-qem-line-container .confirm .no {\n      padding: 10px;\n      text-transform: uppercase;\n      cursor: pointer;\n      color: rgba(152, 170, 182, 0.8);\n      transition: color .1s ease-in-out .05s; }\n    #bda-qem-line-container .confirm .yes:hover {\n      color: #ad0000; }\n    #bda-qem-line-container .confirm .no:hover {\n      color: #98aab6; }\n  #bda-qem-line-container .categories-container .categories-wrapper .item.add-pack-button {\n    filter: unset; }\n  #bda-qem-line-container .add-pack-button {\n    position: relative;\n    width: 20px;\n    height: 20px;\n    margin-right: 5px; }\n  #bda-qem-line-container .add-pack-button > svg {\n    position: absolute;\n    top: 13px; }\n  #bda-qem-line-container .add-pack-button > svg > path {\n    opacity: 0.5;\n    fill: #8c8c8c; }\n  #bda-qem-line-container .add-pack-button > svg > path:hover {\n    opacity: 1; }\n", ""])
+  }, function (e, n) {
+    e.exports = function (e) {
+      var n = [];
+      return n.toString = function () {
+        return this.map(function (n) {
+          var t = function (e, n) {
+            var t = e[1] || "",
+              i = e[3];
+            if (!i) return t;
+            if (n && "function" == typeof btoa) {
+              var a = function (e) {
+                  return "/*# sourceMappingURL=data:application/json;charset=utf-8;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(e)))) + " */"
+                }(i),
+                r = i.sources.map(function (e) {
+                  return "/*# sourceURL=" + i.sourceRoot + e + " */"
+                });
+              return [t].concat(r).concat([a]).join("\n")
             }
+            return [t].join("\n")
+          }(n, e);
+          return n[2] ? "@media " + n[2] + "{" + t + "}" : t
+        }).join("")
+      }, n.i = function (e, t) {
+        "string" == typeof e && (e = [
+          [null, e, ""]
+        ]);
+        for (var i = {}, a = 0; a < this.length; a++) {
+          var r = this[a][0];
+          "number" == typeof r && (i[r] = !0)
         }
-    }
-    if (mode === 'string') {
-        for (var index = 0; index < storage.length; index++) {
-            if (storage[index]['title'] === id) {
-                return storage[index];
-            }
+        for (a = 0; a < e.length; a++) {
+          var o = e[a];
+          "number" == typeof o[0] && i[o[0]] || (t && !o[2] ? o[2] = t : t && (o[2] = "(" + o[2] + ") and (" + t + ")"), n.push(o))
         }
+      }, n
     }
-    
-    return null;
-};
-*/
-
-lineemotes.storage.deletePack = function(id) {
-    var storage = this.get();
-    var log = lineemotes.log;
-    var pack = id;
-    var wasFound = false;
-    
-    for (var i = 0; i < storage.length; i++) {
-	if (storage[i]['starting_id'] == id) {
-            wasFound = true;
-            pack = `${id} - ${storage[i]['title']}`;
-            storage.splice(i, 1);
-            this.set(storage);
-            lineemotes.menu.rebuild();
-            break;
-        }
-    }
-    
-    
-    if (wasFound) {
-        log(`Successfully deleted pack ${pack}`);
-        return true;
-    } else {
-        log(`Pack ${pack} was not found in storage during deletion`);
-        return false;
-    }
-};
-
-lineemotes.storage.swapPack = function(from, to) {
-    var storage = this.get();
-    var log = lineemotes.log;
-    var temp = storage[from];
-    
-    storage[from] = storage[to];
-    storage[to] = temp;
-    this.set(storage);
-    log(`Successfully swapped packs '${storage[to]['title']}' and '${storage[from]['title']}'`);
-    return true;
-};
-
-lineemotes.storage.renamePack = function(id, newtitle) {    
-    if (this.getPack(id) === null) {
-        log(`getPack() returned null, pack ${id} was not found in storage`);
-        return;
-    } else {
-        var storage = lineemotes.storage.get();
-        for (var pack = 0; pack < storage.length; ++pack) {
-            if (storage[pack]['starting_id'] == id) {
-                storage[pack]['title'] = newtitle;
-                this.set(storage);
-                lineemotes.menu.rebuild();
-                break;
-            }
-        }
-    }
-}
-lineemotes.getStylesheet = function () { 
-var stylesheet = `#bda-qem-line-container .icon-edit {
-  filter: grayscale(100%); }
-
-#bda-qem-line-container .add-form {
-  position: absolute;
-  display: flex;
-  bottom: 48px;
-  width: calc(var(--bd-les-width) - 45px);
-  transition: opacity .1s ease-in-out .05s;
-  background: inherit;
-  padding: 15px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  text-transform: uppercase; }
-  #bda-qem-line-container .add-form .labels, #bda-qem-line-container .add-form .inputs {
-    display: flex;
-    flex-direction: column;
-    margin-right: 10px;
-    font-size: 12px;
-    line-height: 17px; }
-    #bda-qem-line-container .add-form .labels input::-webkit-input-placeholder, #bda-qem-line-container .add-form .inputs input::-webkit-input-placeholder {
-      color: rgba(152, 170, 182, 0.5); }
-    #bda-qem-line-container .add-form .labels input, #bda-qem-line-container .add-form .inputs input {
-      border-bottom: solid 1px; }
-    #bda-qem-line-container .add-form .labels #line-add-title,
-    #bda-qem-line-container .add-form .labels #line-add-length,
-    #bda-qem-line-container .add-form .labels #line-add-id, #bda-qem-line-container .add-form .inputs #line-add-title,
-    #bda-qem-line-container .add-form .inputs #line-add-length,
-    #bda-qem-line-container .add-form .inputs #line-add-id {
-      width: 100%;
-      height: 16px; }
-  #bda-qem-line-container .add-form .inputs {
-    flex-grow: 1; }
-  #bda-qem-line-container .add-form .line-add-button {
-    top: 1px;
-    width: 35px;
-    height: auto;
-    padding: 0px;
-    border-radius: 3px;
-    background-color: #98aab6; }
-  #bda-qem-line-container .add-form .line-add-button.invalid:hover {
-    background-color: #ad0000 !important; }
-  #bda-qem-line-container .add-form .line-add-button.valid:hover {
-    background-color: #15ad00 !important; }
-
-.popout.bda-qme-te-hidden #bda-qem-twitch, .popout.bda-qme-te-hidden #bda-qem-favourite {
-  display: none; }
-
-.popout.bda-qme-hidden.bda-qme-te-hidden #bda-qem {
-  display: none; }
-
-.popout.bda-qme-hidden.bda-qme-te-hidden #bda-qem-line-container {
-  border-radius: 5px; }
-
-#bda-qem button {
-  box-shadow: #EFEFEF 1px 0 0 0; }
-
-#bda-qem-twitch,
-#bda-qem-favourite {
-  border-radius: unset; }
-
-#bda-qem-line {
-  border-radius: 5px 0 0 0; }
-
-.bda-dark .emoji-picker {
-  border-color: #2b2b2b; }
-  .bda-dark .emoji-picker .search-bar {
-    border-radius: 0 4px 4px 0px; }
-
-.bda-dark #bda-qem {
-  border-bottom: 1px solid #2b2b2b !important; }
-  .bda-dark #bda-qem button {
-    box-shadow: #2b2b2b 1px 0 0 0; }
-
-.bda-dark #bda-qem-line-container {
-  background-color: #353535;
-  border-color: #2b2b2b; }
-  .bda-dark #bda-qem-line-container .scroller::-webkit-scrollbar,
-  .bda-dark #bda-qem-line-container .scroller::-webkit-scrollbar-track,
-  .bda-dark #bda-qem-line-container .scroller::-webkit-scrollbar-track-piece {
-    background-color: #303030 !important;
-    border-color: #303030 !important; }
-  .bda-dark #bda-qem-line-container .scroller::-webkit-scrollbar-thumb {
-    border-color: #202020 !important;
-    background-color: #202020 !important; }
-  .bda-dark #bda-qem-line-container .preview-container .preview-wrapper {
-    background-color: #353535;
-    border-color: #2b2b2b; }
-  .bda-dark #bda-qem-line-container .confirm {
-    background-color: rgba(35, 35, 35, 0.8); }
-  .bda-dark #bda-qem-line-container .add-pack {
-    opacity: 1; }
-
-.popout.bda-qme-hidden.bda-qme-te-hidden #bda-qem-line-container {
-  border-top-width: 1px; }
-
-#bda-qem-line-container {
-  border-radius: 0 0 5px 5px;
-  font-weight: 800;
-  color: #98aab6;
-  background-color: #fff;
-  border-width: 0px 1px 1px 1px;
-  border-style: solid;
-  border-color: rgba(191, 191, 191, 0.2); }
-  #bda-qem-line-container .scroller-wrap {
-    height: 100%; }
-  #bda-qem-line-container .emote-menu-inner {
-    padding: 5px 15px 48px 15px; }
-  #bda-qem-line-container .line-pack-header {
-    display: flex;
-    color: #98aab6;
-    height: 12px;
-    font-size: 12px;
-    padding: 12px 0 12px 0;
-    text-transform: uppercase; }
-  #bda-qem-line-container .emote-container {
-    width: 71px;
-    height: 71px; }
-  #bda-qem-line-container .preview-container .preview-wrapper {
-    position: absolute;
-    width: 256px;
-    height: calc(var(--bd-les-height) + var(--bd-les-offset));
-    background-color: #fff;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: contain;
-    border-width: 1px;
-    border-style: solid;
-    border-color: rgba(191, 191, 191, 0.2);
-    border-radius: 5px;
-    box-shadow: -10px 0px 80px 0px rgba(0, 0, 0, 0.2);
-    transform: translateX(-258px) translateY(calc(0px - var(--bd-les-height) - var(--bd-les-offset) - var(--bd-les-border-offset))) translateZ(0px);
-    transition: all .15s ease-in-out .15s; }
-  #bda-qem-line-container .categories-container {
-    position: absolute;
-    width: calc(var(--bd-les-width) - 15px);
-    bottom: 1px;
-    overflow: hidden;
-    z-index: 1;
-    margin-top: -44px;
-    background-color: inherit;
-    border-top: 1px solid rgba(0, 0, 0, 0.1); }
-    #bda-qem-line-container .categories-container .categories-wrapper {
-      clear: right;
-      overflow: hidden;
-      white-space: nowrap; }
-      #bda-qem-line-container .categories-container .categories-wrapper .item:first-of-type {
-        margin-left: 15px;
-        margin-right: 0px; }
-      #bda-qem-line-container .categories-container .categories-wrapper .item:nth-child(2) {
-        margin-left: 0px; }
-      #bda-qem-line-container .categories-container .categories-wrapper .item:hover {
-        filter: grayscale(0%); }
-      #bda-qem-line-container .categories-container .categories-wrapper .item {
-        display: inline-block;
-        box-sizing: border-box;
-        cursor: pointer;
-        width: 28px;
-        height: 44px;
-        margin-right: 4px;
-        margin-left: 2.5px;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: 32px 32px;
-        border-bottom: 3px solid transparent;
-        filter: grayscale(100%);
-        transition: filter .1s ease-in-out; }
-  #bda-qem-line-container .visible {
-    opacity: 1 !important; }
-  #bda-qem-line-container .line-pack input {
-    width: 100%; }
-  #bda-qem-line-container .line-pack .line-editbar:hover {
-    opacity: 1; }
-  #bda-qem-line-container .line-pack .line-editbar {
-    float: right;
-    display: flex;
-    padding-top: 10px;
-    opacity: 0;
-    transition: opacity .1s ease-in-out; }
-    #bda-qem-line-container .line-pack .line-editbar .item {
-      display: inline-block;
-      width: 22px;
-      height: 22px;
-      opacity: 0.5;
-      transition: opacity .1s ease-in-out .05s; }
-    #bda-qem-line-container .line-pack .line-editbar .item:hover {
-      opacity: 1; }
-  #bda-qem-line-container input:focus {
-    box-shadow: 0px 2px 0px 0px;
-    outline: none; }
-  #bda-qem-line-container input {
-    color: #98aab6;
-    background-color: inherit;
-    border: none;
-    margin: 0;
-    height: 12px;
-    padding: 0px;
-    font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase; }
-  #bda-qem-line-container .box {
-    width: 100%;
-    color: #98aab6;
-    text-align: center;
-    transform: translateY(250%); }
-  #bda-qem-line-container .confirm {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.8);
-    transition: opacity .1s ease-in-out .05s;
-    z-index: 10; }
-    #bda-qem-line-container .confirm .yes, #bda-qem-line-container .confirm .no {
-      padding: 10px;
-      text-transform: uppercase;
-      cursor: pointer;
-      color: rgba(152, 170, 182, 0.8);
-      transition: color .1s ease-in-out .05s; }
-    #bda-qem-line-container .confirm .yes:hover {
-      color: #ad0000; }
-    #bda-qem-line-container .confirm .no:hover {
-      color: #98aab6; }
-  #bda-qem-line-container .categories-container .categories-wrapper .item.add-pack-button {
-    filter: unset; }
-  #bda-qem-line-container .add-pack-button {
-    position: relative;
-    width: 20px;
-    height: 20px;
-    margin-right: 5px; }
-  #bda-qem-line-container .add-pack-button > svg {
-    position: absolute;
-    top: 13px; }
-  #bda-qem-line-container .add-pack-button > svg > path {
-    opacity: 0.5;
-    fill: #8c8c8c; }
-  #bda-qem-line-container .add-pack-button > svg > path:hover {
-    opacity: 1; }
-` 
-return "<style>" + stylesheet + "</style>"; 
-};
-lineemotes.prototype.getVersion = () => "0.7.1";
+  }]);
